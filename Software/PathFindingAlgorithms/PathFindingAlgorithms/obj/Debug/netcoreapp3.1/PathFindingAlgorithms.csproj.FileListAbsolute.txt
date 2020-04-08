@@ -1,0 +1,14 @@
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\PathFindingAlgorithms.exe
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\PathFindingAlgorithms.deps.json
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\PathFindingAlgorithms.runtimeconfig.json
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\PathFindingAlgorithms.runtimeconfig.dev.json
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\PathFindingAlgorithms.dll
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\PathFindingAlgorithms.pdb
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\obj\Debug\netcoreapp3.1\PathFindingAlgorithms.csprojAssemblyReference.cache
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\obj\Debug\netcoreapp3.1\PathFindingAlgorithms.AssemblyInfoInputs.cache
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\obj\Debug\netcoreapp3.1\PathFindingAlgorithms.AssemblyInfo.cs
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\obj\Debug\netcoreapp3.1\PathFindingAlgorithms.dll
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\obj\Debug\netcoreapp3.1\PathFindingAlgorithms.pdb
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\Maps\maze.cmap
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\Maps\wall.cmap
+C:\Users\Dmitry\source\repos\PathFindingAlgorithms\PathFindingAlgorithms\bin\Debug\netcoreapp3.1\Maps\trap.cmap
