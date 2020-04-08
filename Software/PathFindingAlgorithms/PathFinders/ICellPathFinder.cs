@@ -7,6 +7,6 @@ namespace PathFinders
     {
         event Action<object, int, int, int> OnCellViewedEvent;
 
-        IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop);
+        IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode);
     }
 }

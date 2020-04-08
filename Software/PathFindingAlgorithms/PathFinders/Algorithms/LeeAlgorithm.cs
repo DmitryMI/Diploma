@@ -7,18 +7,9 @@ namespace PathFinders.Algorithms
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
 
-        private static Vector2Int[] GetSteps()
+        private void UpdateCellSurroundings(ICellMap map, int[,] matrix, int x, int y, int d, NeighbourMode neighbourMode)
         {
-            Vector2Int[] steps = new Vector2Int[]
-                {new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(0, 1)};
-            return steps;
-        }
-
-        private void UpdateCellSurroundings(ICellMap map, int[,] matrix, int x, int y, int d)
-        {
-            Vector2Int[] steps = GetSteps();
-
-            foreach (var step in steps)
+            foreach (var step in Steps.GetSteps(neighbourMode))
             {
                 int xNew = x + step.X;
                 int yNew = y + step.Y;
@@ -34,11 +25,11 @@ namespace PathFinders.Algorithms
             }
         }
 
-        private Vector2Int FindDecrement(int[,] matrix, int x, int y)
+        private Vector2Int FindDecrement(int[,] matrix, int x, int y, NeighbourMode neighbourMode)
         {
             int d = matrix[x, y];
 
-            Vector2Int[] steps = GetSteps();
+            Vector2Int[] steps = Steps.GetSteps(neighbourMode);
 
             foreach (var step in steps)
             {
@@ -67,13 +58,7 @@ namespace PathFinders.Algorithms
             public Vector2Int Stop { get; set; }
         }
 
-        private IList<Vector2Int> GetPathWrapper(object parameters)
-        {
-            Parameters parametersStruct = (Parameters) parameters;
-            return GetPath(parametersStruct.Map, parametersStruct.Start, parametersStruct.Stop);
-        }
-
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
             int[,] matrix = new int[map.Width,map.Height];
 
@@ -110,7 +95,7 @@ namespace PathFinders.Algorithms
                         }
                         if (matrix[i, j] == d)
                         {
-                            UpdateCellSurroundings(map, matrix, i, j, d + 1);
+                            UpdateCellSurroundings(map, matrix, i, j, d + 1, neighbourMode);
                             goFurther = true;
                         }
                     }
@@ -131,7 +116,7 @@ namespace PathFinders.Algorithms
             path.Add(current);
             while (current != start)
             {
-                current = FindDecrement(matrix, current.X, current.Y);
+                current = FindDecrement(matrix, current.X, current.Y, neighbourMode);
                 path.Add(current);
             }
 

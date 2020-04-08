@@ -120,9 +120,9 @@ namespace PathFinders.Algorithms
             return path;
         }
 
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
-            IGraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
+            IGraphNode[,] graphNodes = GraphGenerator.GetGraph(map, neighbourMode);
 
             for (int i = 0; i < map.Width; i++)
             {

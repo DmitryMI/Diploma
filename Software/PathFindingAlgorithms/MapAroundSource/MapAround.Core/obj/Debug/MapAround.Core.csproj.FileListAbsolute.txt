@@ -1,9 +1,0 @@
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\bin\MapAround.Core.XML
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\bin\MapAround.Core.dll
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\bin\MapAround.Core.pdb
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\MapAround.Core\obj\Debug\MapAround.Core.csprojAssemblyReference.cache
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\MapAround.Core\obj\Debug\MapAround.Properties.Resources.resources
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\MapAround.Core\obj\Debug\MapAround.Core.csproj.GenerateResource.cache
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\MapAround.Core\obj\Debug\MapAround.Core.csproj.CopyComplete
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\MapAround.Core\obj\Debug\MapAround.Core.dll
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\MapAround.Core\obj\Debug\MapAround.Core.pdb

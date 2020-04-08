@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using MapAround.DataProviders;
 using MapAround.Geometry;
 using MapAround.Mapping;
+using MapAroundPathFinding.PathFinding;
 
 namespace MapAroundPathFinding
 {
@@ -184,6 +185,24 @@ namespace MapAroundPathFinding
         private void OnLayerSettingsChanged(LayerBase layer)
         {
             MapAroundControl.RedrawMap();
+        }
+
+        private LayerBase FindLayerByAlias(string alias)
+        {
+            return _mapAroundMap.Layers.FirstOrDefault(l => l.Alias.Equals(alias));
+        }
+
+        private void GetCellMapButton_Click(object sender, EventArgs e)
+        {
+            BoundingRectangle rectangle = MapAroundControl.GetViewBox();
+            double width = rectangle.Width;
+            double height = rectangle.Height;
+
+            double cellSize = width / 1000;
+            MapAroundCellMap cellMap = new MapAroundCellMap(_mapAroundMap, rectangle, cellSize, cellSize);
+            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
+            CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
+            drawerForm.Show();
         }
     }
 }

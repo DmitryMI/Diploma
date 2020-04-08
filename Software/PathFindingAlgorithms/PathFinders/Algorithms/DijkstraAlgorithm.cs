@@ -18,9 +18,9 @@ namespace PathFinders.Algorithms
         }
         
 
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
-            WeightedGraph<int> weightedGraph = GraphGenerator.GetWeightedGraph(map);
+            WeightedGraph<int> weightedGraph = GraphGenerator.GetWeightedGraph(map, neighbourMode);
 
             int GetNodeIndex(int x, int y) => y * map.Width + x;
             Vector2Int GetNodePosition(int index)

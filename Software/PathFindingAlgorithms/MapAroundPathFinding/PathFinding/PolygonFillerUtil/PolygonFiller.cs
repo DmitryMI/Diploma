@@ -63,7 +63,12 @@ namespace MapAroundPathFinding.PathFinding.PolygonFillerUtil
 
         private void FillScanLine(List<int> xIntersections, int y)
         {
-            for (int i = 0; i < xIntersections.Count; i += 2)
+            int count = xIntersections.Count;
+            if (count % 2 == 1)
+            {
+                count--;
+            }
+            for (int i = 0; i < count; i += 2)
             {
                 int xStart = xIntersections[i];
                 int xEnd = xIntersections[i + 1];
@@ -98,7 +103,10 @@ namespace MapAroundPathFinding.PathFinding.PolygonFillerUtil
                 for (int yStep = yCurrent; yStep < yNext; yStep++)
                 {
                     List<int> xIntersection = GetIntersectionX(activeEdges, yStep);
-                    FillScanLine(xIntersection, yStep);
+                    if (xIntersection.Count > 1)
+                    {
+                        FillScanLine(xIntersection, yStep);
+                    }
                 }
 
                 yCurrent = yNext;

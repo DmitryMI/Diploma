@@ -1,5 +1,0 @@
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\PathFinders\bin\Debug\PathFinders.dll
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\PathFinders\bin\Debug\PathFinders.pdb
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\PathFinders\obj\Debug\PathFinders.csprojAssemblyReference.cache
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\PathFinders\obj\Debug\PathFinders.dll
-C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\PathFinders\obj\Debug\PathFinders.pdb

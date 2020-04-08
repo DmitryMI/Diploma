@@ -33,6 +33,7 @@
             this.MainStatusStrip = new System.Windows.Forms.StatusStrip();
             this.ErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.LayerSettings = new System.Windows.Forms.Button();
+            this.GetCellMapButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.MainStatusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -95,11 +96,22 @@
             this.LayerSettings.UseVisualStyleBackColor = true;
             this.LayerSettings.Click += new System.EventHandler(this.LayerSettings_Click);
             // 
+            // GetCellMapButton
+            // 
+            this.GetCellMapButton.Location = new System.Drawing.Point(1017, 70);
+            this.GetCellMapButton.Name = "GetCellMapButton";
+            this.GetCellMapButton.Size = new System.Drawing.Size(152, 23);
+            this.GetCellMapButton.TabIndex = 5;
+            this.GetCellMapButton.Text = "Дискретизация";
+            this.GetCellMapButton.UseVisualStyleBackColor = true;
+            this.GetCellMapButton.Click += new System.EventHandler(this.GetCellMapButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1181, 589);
+            this.Controls.Add(this.GetCellMapButton);
             this.Controls.Add(this.LayerSettings);
             this.Controls.Add(this.MainStatusStrip);
             this.Controls.Add(this.OpenMapButton);
@@ -122,5 +134,6 @@
         private System.Windows.Forms.StatusStrip MainStatusStrip;
         private System.Windows.Forms.ToolStripStatusLabel ErrorLabel;
         private System.Windows.Forms.Button LayerSettings;
+        private System.Windows.Forms.Button GetCellMapButton;
     }
 }

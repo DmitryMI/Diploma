@@ -115,7 +115,11 @@ namespace PathFinders.Algorithms
         {
             Vector2Int a = GetPosition(graphA);
             Vector2Int b = GetPosition(graphB);
-            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+            double dx = a.X - b.X;
+            double dy = a.Y - b.Y;
+            return (int)(Math.Abs(dx) + Math.Abs(dy));
+
+            //return (int)Math.Round(Math.Sqrt(dx * dx + dy * dy));
         }
 
         private Vector2Int GetPosition(IGraphNode node)
@@ -200,9 +204,9 @@ namespace PathFinders.Algorithms
             return path;
         }
 
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
-            IGraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
+            GraphNode[,] graphNodes = GraphGenerator.GetGraph(map, neighbourMode);
 
             for (int i = 0; i < map.Width; i++)
             {

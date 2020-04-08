@@ -1,14 +1,10 @@
-﻿using PathFinders.Graphs.SimpleTypes;
+﻿using System;
+using PathFinders.Graphs.SimpleTypes;
 
 namespace PathFinders.Graphs
 {
     public static class GraphGenerator
     {
-        private static Vector2Int[] GetSteps()
-        {
-            return new Vector2Int[]{new Vector2Int(-1, 0),new Vector2Int(1, 0),new Vector2Int(0, -1),new Vector2Int(0, 1)};
-        }
-
         private static void MakeConnections(GraphNode[,] nodes, int x, int y, Vector2Int[] steps)
         {
             if(nodes[x, y] == null)
@@ -60,7 +56,7 @@ namespace PathFinders.Graphs
             }
         }
 
-        public static GraphNode[,] GetGraph(ICellMap map)
+        public static GraphNode[,] GetGraph(ICellMap map, NeighbourMode neighbourMode)
         {
             GraphNode[,] nodes = new GraphNode[map.Width,map.Height];
             for (int x = 0; x < map.Width; x++)
@@ -78,7 +74,7 @@ namespace PathFinders.Graphs
                 }
             }
 
-            var steps = GetSteps();
+            var steps = Steps.GetSteps(neighbourMode);
 
             for (int x = 0; x < map.Width; x++)
             {
@@ -91,13 +87,12 @@ namespace PathFinders.Graphs
             return nodes;
         }
 
-        public static WeightedGraph<int> GetWeightedGraph(ICellMap map)
+        public static WeightedGraph<int> GetWeightedGraph(ICellMap map, NeighbourMode neighbourMode)
         {
             int graphSize = map.Width * map.Height;
             WeightedGraph<int> weightedGraph = new WeightedGraph<int>(graphSize, int.MaxValue);
 
-            Vector2Int[] steps = GetSteps();
-
+            Vector2Int[] steps = Steps.GetSteps(neighbourMode);
             for (int x = 0; x < map.Width; x++)
             {
                 for (int y = 0; y < map.Height; y++)
