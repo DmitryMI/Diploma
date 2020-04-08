@@ -1,0 +1,126 @@
+﻿namespace MapAroundPathFinding
+{
+    partial class MainForm
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
+            this.OpenMapButton = new System.Windows.Forms.Button();
+            this.MainStatusStrip = new System.Windows.Forms.StatusStrip();
+            this.ErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.LayerSettings = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
+            this.MainStatusStrip.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // MapAroundControl
+            // 
+            this.MapAroundControl.AlignmentWhileZooming = true;
+            this.MapAroundControl.Animation = false;
+            this.MapAroundControl.AnimationTime = 400;
+            this.MapAroundControl.BackColor = System.Drawing.Color.White;
+            this.MapAroundControl.DragMode = MapAround.UI.WinForms.MapControl.DraggingMode.Pan;
+            this.MapAroundControl.DragThreshold = 1;
+            this.MapAroundControl.Editor = null;
+            this.MapAroundControl.IsDragging = false;
+            this.MapAroundControl.Location = new System.Drawing.Point(12, 12);
+            this.MapAroundControl.Map = null;
+            this.MapAroundControl.MouseWheelZooming = true;
+            this.MapAroundControl.Name = "MapAroundControl";
+            this.MapAroundControl.SelectionMargin = 3;
+            this.MapAroundControl.SelectionRectangleColor = System.Drawing.SystemColors.Highlight;
+            this.MapAroundControl.Size = new System.Drawing.Size(999, 552);
+            this.MapAroundControl.TabIndex = 0;
+            this.MapAroundControl.Text = "mapControl1";
+            this.MapAroundControl.ZoomPercent = 60;
+            // 
+            // OpenMapButton
+            // 
+            this.OpenMapButton.Location = new System.Drawing.Point(1017, 12);
+            this.OpenMapButton.Name = "OpenMapButton";
+            this.OpenMapButton.Size = new System.Drawing.Size(152, 23);
+            this.OpenMapButton.TabIndex = 1;
+            this.OpenMapButton.Text = "Открыть карту";
+            this.OpenMapButton.UseVisualStyleBackColor = true;
+            this.OpenMapButton.Click += new System.EventHandler(this.OpenMapButton_Click);
+            // 
+            // MainStatusStrip
+            // 
+            this.MainStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ErrorLabel});
+            this.MainStatusStrip.Location = new System.Drawing.Point(0, 567);
+            this.MainStatusStrip.Name = "MainStatusStrip";
+            this.MainStatusStrip.Size = new System.Drawing.Size(1181, 22);
+            this.MainStatusStrip.TabIndex = 2;
+            this.MainStatusStrip.Text = "statusStrip1";
+            // 
+            // ErrorLabel
+            // 
+            this.ErrorLabel.ForeColor = System.Drawing.Color.Green;
+            this.ErrorLabel.Name = "ErrorLabel";
+            this.ErrorLabel.Size = new System.Drawing.Size(23, 17);
+            this.ErrorLabel.Text = "OK";
+            // 
+            // LayerSettings
+            // 
+            this.LayerSettings.Location = new System.Drawing.Point(1017, 41);
+            this.LayerSettings.Name = "LayerSettings";
+            this.LayerSettings.Size = new System.Drawing.Size(152, 23);
+            this.LayerSettings.TabIndex = 3;
+            this.LayerSettings.Text = "Настройки слоев";
+            this.LayerSettings.UseVisualStyleBackColor = true;
+            this.LayerSettings.Click += new System.EventHandler(this.LayerSettings_Click);
+            // 
+            // MainForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1181, 589);
+            this.Controls.Add(this.LayerSettings);
+            this.Controls.Add(this.MainStatusStrip);
+            this.Controls.Add(this.OpenMapButton);
+            this.Controls.Add(this.MapAroundControl);
+            this.Name = "MainForm";
+            this.Text = "MainForm";
+            this.Load += new System.EventHandler(this.MainForm_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).EndInit();
+            this.MainStatusStrip.ResumeLayout(false);
+            this.MainStatusStrip.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private MapAround.UI.WinForms.MapControl MapAroundControl;
+        private System.Windows.Forms.Button OpenMapButton;
+        private System.Windows.Forms.StatusStrip MainStatusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel ErrorLabel;
+        private System.Windows.Forms.Button LayerSettings;
+    }
+}

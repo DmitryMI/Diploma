@@ -1,0 +1,7 @@
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\bin\MapAround.WinFormsControl.XML
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\bin\MapAround.WinFormsControl.dll
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\bin\MapAround.WinFormsControl.pdb
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\WinFormsMapControl\obj\Debug\WinFormsMapControl.csprojAssemblyReference.cache
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\WinFormsMapControl\obj\Debug\WinFormsMapControl.csproj.CopyComplete
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\WinFormsMapControl\obj\Debug\MapAround.WinFormsControl.dll
+C:\Users\Dmitry\Documents\GitHub\Diploma\Software\PathFindingAlgorithms\MapAroundSource\WinFormsMapControl\obj\Debug\MapAround.WinFormsControl.pdb
