@@ -1,17 +1,28 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Dmitry\\source\\repos\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj": {}
+    "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Dmitry\\source\\repos\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj": {
+    "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFinders\\PathFinders.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Dmitry\\source\\repos\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj",
+        "projectUniqueName": "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFinders\\PathFinders.csproj",
+        "projectName": "PathFinders",
+        "projectPath": "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFinders\\PathFinders.csproj"
+      },
+      "frameworks": {
+        "net472": {}
+      }
+    },
+    "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj",
         "projectName": "PathFindingAlgorithms",
-        "projectPath": "C:\\Users\\Dmitry\\source\\repos\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj",
+        "projectPath": "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFindingAlgorithms\\PathFindingAlgorithms.csproj",
         "packagesPath": "C:\\Users\\Dmitry\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Dmitry\\source\\repos\\PathFindingAlgorithms\\PathFindingAlgorithms\\obj\\",
+        "outputPath": "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFindingAlgorithms\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",
@@ -31,7 +42,11 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
-            "projectReferences": {}
+            "projectReferences": {
+              "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFinders\\PathFinders.csproj": {
+                "projectPath": "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Software\\PathFindingAlgorithms\\PathFinders\\PathFinders.csproj"
+              }
+            }
           }
         },
         "warningProperties": {

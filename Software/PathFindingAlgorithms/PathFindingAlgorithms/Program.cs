@@ -4,30 +4,32 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
+using PathFinders;
+using PathFinders.Algorithms;
 using PathFindingAlgorithms.ConsolePathFinding;
-using PathFindingAlgorithms.PathFinders;
+
 
 namespace PathFindingAlgorithms
 {
     class Program
     {
         private static ConsoleDrawer[] _consoleDrawers;
-        private static IPathFinder[] _contestants;
+        private static ICellPathFinder[] _contestants;
         private static Task[] _tasks;
-        private static IMap _map;
+        private static ICellMap _map;
 
-        private static Vector2 _start, _stop;
+        private static Vector2Int _start, _stop;
 
         private static int _runningTasks;
 
         static void InitArrays(int count)
         {
             _consoleDrawers = new ConsoleDrawer[count];
-            _contestants = new IPathFinder[count];
+            _contestants = new ICellPathFinder[count];
             _tasks = new Task[count];
         }
 
-        static void InitConsoleDrawer(ConsoleMap map, Vector2 scale, int spacing, Vector2 start, Vector2 stop, int index)
+        static void InitConsoleDrawer(ConsoleMap map, Vector2Int scale, int spacing, Vector2Int start, Vector2Int stop, int index)
         {
             ConsoleColorLayer backgroundLayer = map.GetColorLayer();
             ConsoleTextLayer textLayer = new ConsoleTextLayer(backgroundLayer.Width, backgroundLayer.Height);
@@ -61,11 +63,11 @@ namespace PathFindingAlgorithms
 
             InitArrays(2);
 
-            Vector2 start = map.DefaultStart;
-            Vector2 stop = map.DefaultStop;
+            Vector2Int start = map.DefaultStart;
+            Vector2Int stop = map.DefaultStop;
             _start = start;
             _stop = stop;
-            Vector2 scale = new Vector2(4, 2);
+            Vector2Int scale = new Vector2Int(4, 2);
             int spacing = 4;
 
             
@@ -78,7 +80,7 @@ namespace PathFindingAlgorithms
             _contestants[0] = new AStarAlgorithm();
             _contestants[0].OnCellViewedEvent += OnCellUpdated;
 
-            _contestants[1] = new LeeAlgorithm();
+            _contestants[1] = new BestFirstSearch();
             _contestants[1].OnCellViewedEvent += OnCellUpdated;
 
             StartPathFinder(0);
@@ -103,13 +105,13 @@ namespace PathFindingAlgorithms
         static void GetPath(object indexObj)
         {
             int index = (int) indexObj;
-            IList<Vector2> path = _contestants[index].GetPath(_map, _start, _stop);
+            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop);
 
             DrawPath(path, index);
             _runningTasks--;
         }
 
-        static void DrawPath(IList<Vector2> path, int index)
+        static void DrawPath(IList<Vector2Int> path, int index)
         {
             if (path == null)
             {

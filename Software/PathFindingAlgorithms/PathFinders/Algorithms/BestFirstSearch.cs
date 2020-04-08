@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+using PathFinders.Graphs;
 
-namespace PathFindingAlgorithms.PathFinders
+namespace PathFinders.Algorithms
 {
-    public class BestFirstSearch : IPathFinder, IComparer<GraphNode>
+    public class BestFirstSearch : ICellPathFinder, IGraphPathFinder, IComparer<GraphNode>
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
 
         private struct GraphData
         {
-            public Vector2 Position { get; set; }
+            public Vector2Int Position { get; set; }
             public int DistanceToStop { get; set; }
             public bool IsClosed { get; set; }
             public GraphNode ParentNode { get; set; }
             public int StepsToStart { get; set; }
         }
 
-        private int GetDistance(Vector2 from, Vector2 to)
+        private int GetDistance(Vector2Int from, Vector2Int to)
         {
             return Math.Abs(from.X - to.X) + Math.Abs(from.Y - to.Y);
         }
@@ -36,7 +35,7 @@ namespace PathFindingAlgorithms.PathFinders
             return data.IsClosed;
         }
 
-        private Vector2 GetPosition(GraphNode node)
+        private Vector2Int GetPosition(GraphNode node)
         {
             return node.GetData<GraphData>().Position;
         }
@@ -54,25 +53,9 @@ namespace PathFindingAlgorithms.PathFinders
             node.Data = data;
         }
 
-        public IList<Vector2> GetPath(IMap map, Vector2 start, Vector2 stop)
+        public IList<Vector2Int> GetPath(GraphNode[,] graphNodes, GraphNode startNode, GraphNode stopNode)
         {
-            GraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
-
-            for (int i = 0; i < map.Width; i++)
-            {
-                for (int j = 0; j < map.Height; j++)
-                {
-                    if(graphNodes[i, j] == null)
-                        continue;
-                    
-                    Vector2 pos = new Vector2(i, j);
-                    graphNodes[i, j].Data = new GraphData(){DistanceToStop = GetDistance(pos, stop), Position = pos };
-                }
-            }
-
             List<GraphNode> openNodes = new List<GraphNode>();
-
-            GraphNode startNode = graphNodes[start.X, start.Y];
 
             openNodes.Add(startNode);
 
@@ -93,12 +76,12 @@ namespace PathFindingAlgorithms.PathFinders
                     continue;
                 }
 
-                Vector2 position = currentNode.GetData<GraphData>().Position;
+                Vector2Int position = currentNode.GetData<GraphData>().Position;
                 OnCellViewedEvent?.Invoke(this, position.X, position.Y, GetStepsToStart(currentNode));
-                
+
                 SetClosed(currentNode);
 
-                if (currentNode.GetData<GraphData>().Position == stop)
+                if (currentNode == stopNode)
                 {
                     break;
                 }
@@ -113,22 +96,44 @@ namespace PathFindingAlgorithms.PathFinders
                 }
             }
 
-            if (!graphNodes[stop.X, stop.Y].GetData<GraphData>().IsClosed)
+            if (!startNode.GetData<GraphData>().IsClosed)
             {
                 return null;
             }
 
-            List<Vector2> path = new List<Vector2>();
+            List<Vector2Int> path = new List<Vector2Int>();
 
-            GraphNode currentPathNode = graphNodes[stop.X, stop.Y];
+            GraphNode currentPathNode = stopNode;
             path.Add(currentPathNode.GetData<GraphData>().Position);
-            while (currentPathNode != graphNodes[start.X, start.Y])
+            while (currentPathNode != startNode)
             {
                 currentPathNode = currentPathNode.GetData<GraphData>().ParentNode;
                 path.Add(currentPathNode.GetData<GraphData>().Position);
             }
 
             return path;
+        }
+
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
+        {
+            GraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
+
+            for (int i = 0; i < map.Width; i++)
+            {
+                for (int j = 0; j < map.Height; j++)
+                {
+                    if(graphNodes[i, j] == null)
+                        continue;
+                    
+                    Vector2Int pos = new Vector2Int(i, j);
+                    graphNodes[i, j].Data = new GraphData(){DistanceToStop = GetDistance(pos, stop), Position = pos };
+                }
+            }
+
+            GraphNode startNode = graphNodes[start.X, start.Y];
+            GraphNode stopNode = graphNodes[stop.X, stop.Y];
+
+            return GetPath(graphNodes, startNode, stopNode);
         }
 
         public int Compare(GraphNode a, GraphNode b)

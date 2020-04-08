@@ -1,8 +1,9 @@
 ﻿using System;
+using PathFinders;
 
 namespace PathFindingAlgorithms.ConsolePathFinding
 {
-    public class ConsoleMap : IMap
+    public class ConsoleMap : ICellMap
     {
         private readonly bool[,] _cells;
         public bool IsPassable(int x, int y)
@@ -25,8 +26,8 @@ namespace PathFindingAlgorithms.ConsolePathFinding
         public int Width { get; set; }
         public int Height { get; set; }
 
-        public Vector2 DefaultStart { get; set; }
-        public Vector2 DefaultStop { get; set; }
+        public Vector2Int DefaultStart { get; set; }
+        public Vector2Int DefaultStop { get; set; }
 
         public void SetCell(int x, int y, bool passable)
         {

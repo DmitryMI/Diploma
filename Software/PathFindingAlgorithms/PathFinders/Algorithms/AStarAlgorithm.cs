@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using PathFinders.Graphs;
 
-namespace PathFindingAlgorithms.PathFinders
+namespace PathFinders.Algorithms
 {
-    public class AStarAlgorithm : IPathFinder, IComparer<GraphNode>
+    public class AStarAlgorithm : ICellPathFinder, IGraphPathFinder, IComparer<GraphNode>
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
         
+
         private struct GraphData
         {
             public int HValue { get; set; }
@@ -16,7 +16,7 @@ namespace PathFindingAlgorithms.PathFinders
             public int FValue => HValue + GValue;
             public bool IsExplored { get; set; }
             public GraphNode PathPredecessor { get; set; }
-            public Vector2 Position { get; set; }
+            public Vector2Int Position { get; set; }
         }
 
         private void InsertSorted(IList<GraphNode> nodeList, GraphNode graph)
@@ -112,42 +112,26 @@ namespace PathFindingAlgorithms.PathFinders
 
         private int GetEstimateDistance(GraphNode graphA, GraphNode graphB)
         {
-            Vector2 a = GetPosition(graphA);
-            Vector2 b = GetPosition(graphB);
+            Vector2Int a = GetPosition(graphA);
+            Vector2Int b = GetPosition(graphB);
             return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
         }
 
-        private Vector2 GetPosition(GraphNode node)
+        private Vector2Int GetPosition(GraphNode node)
         {
             GraphData data = (GraphData)node.Data;
             return data.Position;
         }
 
-        private void SetPosition(GraphNode node, Vector2 position)
+        private void SetPosition(GraphNode node, Vector2Int position)
         {
             GraphData data = (GraphData)node.Data;
             data.Position = position;
             node.Data = data;
         }
-        
-        public IList<Vector2> GetPath(IMap map, Vector2 start, Vector2 stop)
+
+        public IList<Vector2Int> GetPath(GraphNode[,] map, GraphNode startNode, GraphNode stopNode)
         {
-            GraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
-
-            for (int i = 0; i < map.Width; i++)
-            {
-                for (int j = 0; j < map.Height; j++)
-                {
-                    if(graphNodes[i, j] == null)
-                        continue;
-                    graphNodes[i, j].Data = new GraphData();
-                    SetPosition(graphNodes[i, j], new Vector2(i, j));
-                }
-            }
-
-            GraphNode startNode = graphNodes[start.X, start.Y];
-            GraphNode stopNode = graphNodes[stop.X, stop.Y];
-
             List<GraphNode> openNodes = new List<GraphNode>();
             List<GraphNode> closedNodes = new List<GraphNode>();
 
@@ -157,7 +141,7 @@ namespace PathFindingAlgorithms.PathFinders
             {
                 SortFValue(openNodes);
                 GraphNode x = DequeueFirst(openNodes);
-                Vector2 position = GetPosition(x);
+                Vector2Int position = GetPosition(x);
                 OnCellViewedEvent?.Invoke(this, position.X, position.Y, GetGValue(x));
                 if (x == stopNode)
                 {
@@ -200,19 +184,40 @@ namespace PathFindingAlgorithms.PathFinders
                 return null;
             }
 
-            List<Vector2> path = new List<Vector2>();
+            List<Vector2Int> path = new List<Vector2Int>();
             path.Add(GetPosition(stopNode));
             GraphNode currentNode = stopNode;
             while (true)
             {
                 currentNode = GetPathPredecessor(currentNode);
-                if(currentNode == null)
+                if (currentNode == null)
                     break;
                 path.Add(GetPosition(currentNode));
             }
-            
+
 
             return path;
+        }
+
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
+        {
+            GraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
+
+            for (int i = 0; i < map.Width; i++)
+            {
+                for (int j = 0; j < map.Height; j++)
+                {
+                    if(graphNodes[i, j] == null)
+                        continue;
+                    graphNodes[i, j].Data = new GraphData();
+                    SetPosition(graphNodes[i, j], new Vector2Int(i, j));
+                }
+            }
+
+            GraphNode startNode = graphNodes[start.X, start.Y];
+            GraphNode stopNode = graphNodes[stop.X, stop.Y];
+
+            return GetPath(graphNodes, startNode, stopNode);
         }
 
         public int Compare(GraphNode x, GraphNode y)

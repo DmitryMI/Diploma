@@ -7,14 +7,27 @@
   "targets": {
     ".NETCoreApp,Version=v3.1": {
       "PathFindingAlgorithms/1.0.0": {
+        "dependencies": {
+          "PathFinders": "1.0.0"
+        },
         "runtime": {
           "PathFindingAlgorithms.dll": {}
+        }
+      },
+      "PathFinders/1.0.0": {
+        "runtime": {
+          "PathFinders.dll": {}
         }
       }
     }
   },
   "libraries": {
     "PathFindingAlgorithms/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PathFinders/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

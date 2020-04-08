@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PathFindingAlgorithms.PathFinders
+﻿namespace PathFinders.Graphs
 {
     public static class GraphGenerator
     {
-        private static Vector2[] GetSteps()
+        private static Vector2Int[] GetSteps()
         {
-            return new Vector2[]{new Vector2(-1, 0),new Vector2(1, 0),new Vector2(0, -1),new Vector2(0, 1)};
+            return new Vector2Int[]{new Vector2Int(-1, 0),new Vector2Int(1, 0),new Vector2Int(0, -1),new Vector2Int(0, 1)};
         }
 
-        private static void MakeConnections(GraphNode[,] nodes, int x, int y, Vector2[] steps)
+        private static void MakeConnections(GraphNode[,] nodes, int x, int y, Vector2Int[] steps)
         {
             if(nodes[x, y] == null)
                 return;
@@ -41,7 +37,7 @@ namespace PathFindingAlgorithms.PathFinders
             }
         }
 
-        private static void MakeConnections(WeightedGraph<int> weightedGraph, IMap map, int x, int y, Vector2[] steps)
+        private static void MakeConnections(WeightedGraph<int> weightedGraph, ICellMap map, int x, int y, Vector2Int[] steps)
         {
             void SetWeightLambda(int fromX, int fromY, int toX, int toY, int weight) => weightedGraph.SetWeight(fromY * map.Width + fromX, toY * map.Width + toX, weight);
 
@@ -62,7 +58,7 @@ namespace PathFindingAlgorithms.PathFinders
             }
         }
 
-        public static GraphNode[,] GetGraph(IMap map)
+        public static GraphNode[,] GetGraph(ICellMap map)
         {
             GraphNode[,] nodes = new GraphNode[map.Width,map.Height];
             for (int x = 0; x < map.Width; x++)
@@ -93,12 +89,12 @@ namespace PathFindingAlgorithms.PathFinders
             return nodes;
         }
 
-        public static WeightedGraph<int> GetWeightedGraph(IMap map)
+        public static WeightedGraph<int> GetWeightedGraph(ICellMap map)
         {
             int graphSize = map.Width * map.Height;
             WeightedGraph<int> weightedGraph = new WeightedGraph<int>(graphSize, int.MaxValue);
 
-            Vector2[] steps = GetSteps();
+            Vector2Int[] steps = GetSteps();
 
             for (int x = 0; x < map.Width; x++)
             {

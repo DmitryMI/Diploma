@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29905.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFindingAlgorithms", "PathFindingAlgorithms\PathFindingAlgorithms.csproj", "{CD5E9176-1F9A-4479-9CD3-10C4D7BF57C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PathFindingAlgorithms", "PathFindingAlgorithms\PathFindingAlgorithms.csproj", "{CD5E9176-1F9A-4479-9CD3-10C4D7BF57C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathFinders", "PathFinders\PathFinders.csproj", "{FAA42927-D271-4C4A-8570-4D800106C446}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{CD5E9176-1F9A-4479-9CD3-10C4D7BF57C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD5E9176-1F9A-4479-9CD3-10C4D7BF57C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD5E9176-1F9A-4479-9CD3-10C4D7BF57C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAA42927-D271-4C4A-8570-4D800106C446}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAA42927-D271-4C4A-8570-4D800106C446}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAA42927-D271-4C4A-8570-4D800106C446}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAA42927-D271-4C4A-8570-4D800106C446}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

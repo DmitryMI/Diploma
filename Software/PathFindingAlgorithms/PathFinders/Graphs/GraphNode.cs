@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
-namespace PathFindingAlgorithms.PathFinders
+namespace PathFinders.Graphs
 {
     public class GraphNode : IList<GraphNode>
     {
         public object Data { get; set; }
+
+        public Vector2Int Position { get; set; }
 
         public T GetData<T>()
         {

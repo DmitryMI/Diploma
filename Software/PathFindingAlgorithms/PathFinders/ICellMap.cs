@@ -1,6 +1,6 @@
-﻿namespace PathFindingAlgorithms
+﻿namespace PathFinders
 {
-    public interface IMap
+    public interface ICellMap
     {
         bool IsPassable(int x, int y);
         bool IsInBounds(int x, int y);

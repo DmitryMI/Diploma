@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PathFindingAlgorithms.PathFinders
+﻿namespace PathFinders.Graphs
 {
     public class WeightedGraph<T>
     {

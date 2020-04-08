@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using PathFinders;
 
 namespace PathFindingAlgorithms.ConsolePathFinding
 {
@@ -10,15 +11,15 @@ namespace PathFindingAlgorithms.ConsolePathFinding
         private ConsoleColorLayer _backgroundLayer;
         private ConsoleTextLayer _textLayer;
 
-        private Queue<Vector2> _updatedCells = new Queue<Vector2>();
+        private Queue<Vector2Int> _updatedCells = new Queue<Vector2Int>();
 
         private int posX, posY;
         public int Width { get; }
         public int Height { get; }
 
-        public Vector2 Scale { get; }
+        public Vector2Int Scale { get; }
 
-        public ConsoleDrawer(int x, int y, Vector2 scale, ConsoleColorLayer backgroundLayer, ConsoleTextLayer textLayer)
+        public ConsoleDrawer(int x, int y, Vector2Int scale, ConsoleColorLayer backgroundLayer, ConsoleTextLayer textLayer)
         {
             if (backgroundLayer.Width != textLayer.Width || backgroundLayer.Height != textLayer.Height)
             {
@@ -36,7 +37,7 @@ namespace PathFindingAlgorithms.ConsolePathFinding
             Height = backgroundLayer.Height;
         }
 
-        public ConsoleDrawer(int x, int y, int width, int height, Vector2 scale)
+        public ConsoleDrawer(int x, int y, int width, int height, Vector2Int scale)
         {
             posX = x;
             posY = y;
@@ -100,32 +101,32 @@ namespace PathFindingAlgorithms.ConsolePathFinding
         {
             _textLayer.SetChar(x, y, coloredChar.Text);
             _textLayer.SetColor(x, y, coloredChar.Color);
-            _updatedCells.Enqueue(new Vector2(x, y));
+            _updatedCells.Enqueue(new Vector2Int(x, y));
         }
 
         public void SetTextCell(int x, int y, string c)
         {
             _textLayer.SetChar(x, y, c);
-            _updatedCells.Enqueue(new Vector2(x, y));
+            _updatedCells.Enqueue(new Vector2Int(x, y));
         }
 
         public void SetTextCell(int x, int y, ConsoleColor color)
         {
             _textLayer.SetColor(x, y, color);
-            _updatedCells.Enqueue(new Vector2(x, y));
+            _updatedCells.Enqueue(new Vector2Int(x, y));
         }
 
         public void SetBackgroundCell(int x, int y, ConsoleColor color)
         {
             _backgroundLayer[x, y] = color;
-            _updatedCells.Enqueue(new Vector2(x, y));
+            _updatedCells.Enqueue(new Vector2Int(x, y));
         }
 
         public void Update()
         {
             while (_updatedCells.Count > 0)
             {
-                Vector2 cell = _updatedCells.Dequeue();
+                Vector2Int cell = _updatedCells.Dequeue();
                 DrawCell(cell.X, cell.Y);
             }
         }

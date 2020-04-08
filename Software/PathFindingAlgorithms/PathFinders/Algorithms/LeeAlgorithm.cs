@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PathFindingAlgorithms.PathFinders
+namespace PathFinders.Algorithms
 {
-    public class LeeAlgorithm : IPathFinder
+    public class LeeAlgorithm : ICellPathFinder
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
 
-        private static Vector2[] GetSteps()
+        private static Vector2Int[] GetSteps()
         {
-            Vector2[] steps = new Vector2[]
-                {new Vector2(-1, 0), new Vector2(1, 0), new Vector2(0, -1), new Vector2(0, 1)};
+            Vector2Int[] steps = new Vector2Int[]
+                {new Vector2Int(-1, 0), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(0, 1)};
             return steps;
         }
 
-        private void UpdateCellSurroundings(IMap map, int[,] matrix, int x, int y, int d)
+        private void UpdateCellSurroundings(ICellMap map, int[,] matrix, int x, int y, int d)
         {
-            Vector2[] steps = GetSteps();
+            Vector2Int[] steps = GetSteps();
 
             foreach (var step in steps)
             {
@@ -36,11 +34,11 @@ namespace PathFindingAlgorithms.PathFinders
             }
         }
 
-        private Vector2 FindDecrement(int[,] matrix, int x, int y)
+        private Vector2Int FindDecrement(int[,] matrix, int x, int y)
         {
             int d = matrix[x, y];
 
-            Vector2[] steps = GetSteps();
+            Vector2Int[] steps = GetSteps();
 
             foreach (var step in steps)
             {
@@ -55,27 +53,27 @@ namespace PathFindingAlgorithms.PathFinders
 
                 if (matrix[xNew, yNew] == d - 1)
                 {
-                    return new Vector2(xNew, yNew);
+                    return new Vector2Int(xNew, yNew);
                 }
             }
 
-            return default(Vector2);
+            return default(Vector2Int);
         }
 
         private struct Parameters
         {
-            public IMap Map { get; set; }
-            public Vector2 Start { get; set; }
-            public Vector2 Stop { get; set; }
+            public ICellMap Map { get; set; }
+            public Vector2Int Start { get; set; }
+            public Vector2Int Stop { get; set; }
         }
 
-        private IList<Vector2> GetPathWrapper(object parameters)
+        private IList<Vector2Int> GetPathWrapper(object parameters)
         {
             Parameters parametersStruct = (Parameters) parameters;
             return GetPath(parametersStruct.Map, parametersStruct.Start, parametersStruct.Stop);
         }
 
-        public IList<Vector2> GetPath(IMap map, Vector2 start, Vector2 stop)
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
         {
             int[,] matrix = new int[map.Width,map.Height];
 
@@ -127,9 +125,9 @@ namespace PathFindingAlgorithms.PathFinders
                 return null;
             }
 
-            List<Vector2> path = new List<Vector2>();
+            List<Vector2Int> path = new List<Vector2Int>();
 
-            Vector2 current = stop;
+            Vector2Int current = stop;
             path.Add(current);
             while (current != start)
             {

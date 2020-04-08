@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using PathFinders;
 
 namespace PathFindingAlgorithms.ConsolePathFinding
 {
@@ -41,12 +42,12 @@ namespace PathFindingAlgorithms.ConsolePathFinding
                     else if (lines[y][x] == start)
                     {
                         map.SetCell(x, y, true);
-                        map.DefaultStart = new Vector2(x, y);
+                        map.DefaultStart = new Vector2Int(x, y);
                     }
                     else if (lines[y][x] == stop)
                     {
                         map.SetCell(x, y, true);
-                        map.DefaultStop = new Vector2(x, y);
+                        map.DefaultStop = new Vector2Int(x, y);
                     }
                     else
                     {

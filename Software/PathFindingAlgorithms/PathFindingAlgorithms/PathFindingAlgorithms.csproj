@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PathFinders\PathFinders.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Maps\trap.cmap">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

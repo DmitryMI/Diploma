@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using PathFinders.Graphs;
 
-namespace PathFindingAlgorithms.PathFinders
+namespace PathFinders.Algorithms
 {
-    public class DijkstraAlgorithm : IPathFinder
+    public class DijkstraAlgorithm : ICellPathFinder
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
 
@@ -17,16 +17,16 @@ namespace PathFindingAlgorithms.PathFinders
         }
         
 
-        public IList<Vector2> GetPath(IMap map, Vector2 start, Vector2 stop)
+        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
         {
             WeightedGraph<int> weightedGraph = GraphGenerator.GetWeightedGraph(map);
 
             int GetNodeIndex(int x, int y) => y * map.Width + x;
-            Vector2 GetNodePosition(int index)
+            Vector2Int GetNodePosition(int index)
             {
                 int y = index / map.Width;
                 int x = index - map.Width * y;
-                return new Vector2(x, y);
+                return new Vector2Int(x, y);
             }
 
             void SetArrayValue<T>(T[] array, int x, int y, T value) => array[GetNodeIndex(x, y)] = value;
@@ -70,7 +70,7 @@ namespace PathFindingAlgorithms.PathFinders
                         distanceJ = nDistance;
                         distances[j] = distanceJ;
                         prev[j] = i;
-                        Vector2 nodePosition = GetNodePosition(j);
+                        Vector2Int nodePosition = GetNodePosition(j);
                         OnCellViewedEvent?.Invoke(this, nodePosition.X, nodePosition.Y, distanceJ);
                     }
                 }
@@ -85,7 +85,7 @@ namespace PathFindingAlgorithms.PathFinders
                 }
             }
 
-            List<Vector2> path = new List<Vector2>();
+            List<Vector2Int> path = new List<Vector2Int>();
 
 
             int pathIndex = GetNodeIndex(stop.X, stop.Y);
