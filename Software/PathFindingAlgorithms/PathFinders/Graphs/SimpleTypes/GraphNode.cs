@@ -1,11 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace PathFinders.Graphs
+namespace PathFinders.Graphs.SimpleTypes
 {
-    public class GraphNode : IList<GraphNode>
+    public class GraphNode : IList<GraphNode>, IGraphNode
     {
+        private List<GraphNode> _connections = new List<GraphNode>();
+
         public object Data { get; set; }
+
+        public ICollection<IGraphNode> GetConnectedNodes()
+        {
+            IGraphNode[] connectedNodes = new IGraphNode[_connections.Count];
+            for (int i = 0; i < connectedNodes.Length; i++)
+            {
+                connectedNodes[i] = _connections[i];
+            }
+
+            return connectedNodes;
+        }
 
         public Vector2Int Position { get; set; }
 
@@ -14,7 +27,7 @@ namespace PathFinders.Graphs
             return (T) Data;
         }
 
-        private List<GraphNode> _connections = new List<GraphNode>();
+        
 
         public List<GraphNode> Connections => _connections;
 

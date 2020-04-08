@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using PathFinders.Graphs;
+using PathFinders.Graphs.SimpleTypes;
 
 namespace PathFinders.Algorithms
 {

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using PathFinders.Graphs;
+using PathFinders.Graphs.SimpleTypes;
 
 namespace PathFinders.Algorithms
 {
-    public class BestFirstSearch : ICellPathFinder, IGraphPathFinder, IComparer<GraphNode>
+    public class BestFirstSearch : ICellPathFinder, IGraphPathFinder, IComparer<IGraphNode>
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
 
@@ -13,8 +14,13 @@ namespace PathFinders.Algorithms
             public Vector2Int Position { get; set; }
             public int DistanceToStop { get; set; }
             public bool IsClosed { get; set; }
-            public GraphNode ParentNode { get; set; }
+            public IGraphNode ParentNode { get; set; }
             public int StepsToStart { get; set; }
+        }
+
+        private T GetData<T>(IGraphNode node)
+        {
+            return (T) node.Data;
         }
 
         private int GetDistance(Vector2Int from, Vector2Int to)
@@ -22,47 +28,47 @@ namespace PathFinders.Algorithms
             return Math.Abs(from.X - to.X) + Math.Abs(from.Y - to.Y);
         }
 
-        private void SetClosed(GraphNode node)
+        private void SetClosed(IGraphNode node)
         {
-            GraphData data = node.GetData<GraphData>();
+            GraphData data = GetData<GraphData>(node);
             data.IsClosed = true;
             node.Data = data;
         }
 
-        private bool IsClosed(GraphNode node)
+        private bool IsClosed(IGraphNode node)
         {
-            GraphData data = node.GetData<GraphData>();
+            GraphData data = GetData<GraphData>(node);
             return data.IsClosed;
         }
 
-        private Vector2Int GetPosition(GraphNode node)
+        private Vector2Int GetPosition(IGraphNode node)
         {
-            return node.GetData<GraphData>().Position;
+            return GetData<GraphData>(node).Position;
         }
 
-        private int GetStepsToStart(GraphNode node)
+        private int GetStepsToStart(IGraphNode node)
         {
-            return node.GetData<GraphData>().StepsToStart;
+            return GetData<GraphData>(node).StepsToStart;
         }
 
-        private void SetParentNode(GraphNode node, GraphNode parent)
+        private void SetParentNode(IGraphNode node, IGraphNode parent)
         {
-            GraphData data = node.GetData<GraphData>();
+            GraphData data = GetData<GraphData>(node);
             data.ParentNode = parent;
             data.StepsToStart = GetStepsToStart(parent) + 1;
             node.Data = data;
         }
 
-        public IList<Vector2Int> GetPath(GraphNode[,] graphNodes, GraphNode startNode, GraphNode stopNode)
+        public IList<Vector2Int> GetPath(IGraph graph, IGraphNode startNode, IGraphNode stopNode)
         {
-            List<GraphNode> openNodes = new List<GraphNode>();
+            List<IGraphNode> openNodes = new List<IGraphNode>();
 
             openNodes.Add(startNode);
 
             while (openNodes.Count > 0)
             {
                 openNodes.Sort(this);
-                GraphNode currentNode = openNodes[0];
+                IGraphNode currentNode = openNodes[0];
                 openNodes.RemoveAt(0);
 
                 if (openNodes.Count > 0 && openNodes[0] == currentNode)
@@ -76,7 +82,7 @@ namespace PathFinders.Algorithms
                     continue;
                 }
 
-                Vector2Int position = currentNode.GetData<GraphData>().Position;
+                Vector2Int position = GetData<GraphData>(currentNode).Position;
                 OnCellViewedEvent?.Invoke(this, position.X, position.Y, GetStepsToStart(currentNode));
 
                 SetClosed(currentNode);
@@ -86,7 +92,7 @@ namespace PathFinders.Algorithms
                     break;
                 }
 
-                foreach (var connected in currentNode)
+                foreach (var connected in currentNode.GetConnectedNodes())
                 {
                     if (!IsClosed(connected))
                     {
@@ -96,19 +102,19 @@ namespace PathFinders.Algorithms
                 }
             }
 
-            if (!startNode.GetData<GraphData>().IsClosed)
+            if (!GetData<GraphData>(startNode).IsClosed)
             {
                 return null;
             }
 
             List<Vector2Int> path = new List<Vector2Int>();
 
-            GraphNode currentPathNode = stopNode;
-            path.Add(currentPathNode.GetData<GraphData>().Position);
+            IGraphNode currentPathNode = stopNode;
+            path.Add(GetData<GraphData>(currentPathNode).Position);
             while (currentPathNode != startNode)
             {
-                currentPathNode = currentPathNode.GetData<GraphData>().ParentNode;
-                path.Add(currentPathNode.GetData<GraphData>().Position);
+                currentPathNode = GetData<GraphData>(currentPathNode).ParentNode;
+                path.Add(GetData<GraphData>(currentPathNode).Position);
             }
 
             return path;
@@ -116,7 +122,7 @@ namespace PathFinders.Algorithms
 
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop)
         {
-            GraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
+            IGraphNode[,] graphNodes = GraphGenerator.GetGraph(map);
 
             for (int i = 0; i < map.Width; i++)
             {
@@ -130,17 +136,18 @@ namespace PathFinders.Algorithms
                 }
             }
 
-            GraphNode startNode = graphNodes[start.X, start.Y];
-            GraphNode stopNode = graphNodes[stop.X, stop.Y];
+            IGraphNode startNode = graphNodes[start.X, start.Y];
+            IGraphNode stopNode = graphNodes[stop.X, stop.Y];
+            IGraph graph = new Graph(graphNodes);
 
-            return GetPath(graphNodes, startNode, stopNode);
+            return GetPath(graph, startNode, stopNode);
         }
 
-        public int Compare(GraphNode a, GraphNode b)
+        public int Compare(IGraphNode a, IGraphNode b)
         {
             if (a == null || b == null)
                 return 0;
-            return a.GetData<GraphData>().DistanceToStop - b.GetData<GraphData>().DistanceToStop;
+            return GetData<GraphData>(a).DistanceToStop - GetData<GraphData>(b).DistanceToStop;
         }
     }
 }

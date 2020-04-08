@@ -1,4 +1,6 @@
-﻿namespace PathFinders.Graphs
+﻿using PathFinders.Graphs.SimpleTypes;
+
+namespace PathFinders.Graphs
 {
     public static class GraphGenerator
     {

@@ -7,6 +7,6 @@ namespace PathFinders.Graphs
     {
         event Action<object, int, int, int> OnCellViewedEvent;
 
-        IList<Vector2Int> GetPath(GraphNode[,] map, GraphNode start, GraphNode stop);
+        IList<Vector2Int> GetPath(IGraph map, IGraphNode start, IGraphNode stop);
     }
 }

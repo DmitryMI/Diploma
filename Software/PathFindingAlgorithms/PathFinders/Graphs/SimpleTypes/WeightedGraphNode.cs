@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PathFinders.Graphs
+namespace PathFinders.Graphs.SimpleTypes
 {
-    public class WeightedGraphNode<T> : GraphNode
+    public class WeightedGraphNode<T> : GraphNode, IWeightedGraphNode<T>
     {
         private List<T> _weights = new List<T>();
-        public T InfinityValue { get; set; }
 
         public List<T> Weights => _weights;
 
-        public WeightedGraphNode(T infinityValue)
+        public WeightedGraphNode(T infinityWeight)
         {
-            InfinityValue = infinityValue;
+            InfinityWeight = infinityWeight;
         }
 
         public T GetWeight(int connectionIndex)
@@ -60,7 +59,7 @@ namespace PathFinders.Graphs
         public override void Add(GraphNode item)
         {
             Connections.Add(item);
-            Weights.Add(InfinityValue);
+            Weights.Add(InfinityWeight);
         }
 
         public override void Clear()
@@ -83,7 +82,7 @@ namespace PathFinders.Graphs
         public override void Insert(int index, GraphNode item)
         {
             Connections.Insert(index, item);
-            Weights.Insert(index, InfinityValue);
+            Weights.Insert(index, InfinityWeight);
         }
 
         public override void RemoveAt(int index)
@@ -91,5 +90,23 @@ namespace PathFinders.Graphs
             Weights.RemoveAt(index);
             Connections.RemoveAt(index);
         }
+
+        public ICollection<IWeightedGraphNode<T>> GetConnectedWeightedNodes()
+        {
+            List<IWeightedGraphNode<T>> result = new List<IWeightedGraphNode<T>>(Connections.Count);
+            foreach (var connection in Connections)
+            {
+                result.Add((IWeightedGraphNode<T>)connection);
+            }
+
+            return result;
+        }
+
+        public ICollection<T> GetConnectionWeights()
+        {
+            return _weights;
+        }
+
+        public T InfinityWeight { get; set; }
     }
 }
