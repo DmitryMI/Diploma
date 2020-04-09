@@ -41,7 +41,7 @@
             this.PictureBox.BackColor = System.Drawing.Color.White;
             this.PictureBox.Location = new System.Drawing.Point(12, 12);
             this.PictureBox.Name = "PictureBox";
-            this.PictureBox.Size = new System.Drawing.Size(1001, 550);
+            this.PictureBox.Size = new System.Drawing.Size(1000, 550);
             this.PictureBox.TabIndex = 0;
             this.PictureBox.TabStop = false;
             this.PictureBox.Click += new System.EventHandler(this.PictureBox_Click);

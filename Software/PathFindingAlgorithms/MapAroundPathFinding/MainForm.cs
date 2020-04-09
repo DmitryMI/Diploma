@@ -198,7 +198,7 @@ namespace MapAroundPathFinding
             double width = rectangle.Width;
             double height = rectangle.Height;
 
-            double cellSize = 2E-5;
+            double cellSize = 4E-5;
             MapAroundCellMap cellMap = new MapAroundCellMap(_mapAroundMap, rectangle, cellSize, cellSize);
             cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
             CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);

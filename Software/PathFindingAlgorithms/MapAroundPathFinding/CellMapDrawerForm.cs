@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MapAroundPathFinding.PathFinding;
@@ -21,10 +23,16 @@ namespace MapAroundPathFinding
         private Vector2Int _startPoint;
         private Vector2Int _stopPoint;
 
+        private int DefaultWidth = 1000;
+        private int DefaultHeight = 550;
+
         private MapAroundCellMap _cellMap;
         private Graphics _pictureBoxGraphics;
         private SolidBrush _reportBrush = new SolidBrush(Color.Green);
+        private SolidBrush _pathBrush = new SolidBrush(Color.Blue);
         private int _stepsEstimate;
+
+        private int _scale;
 
         public CellMapDrawerForm(MapAroundCellMap cellMap)
         {
@@ -56,9 +64,22 @@ namespace MapAroundPathFinding
 
         private ICellPathFinder InstantiatePathFinder()
         {
-            PathFinderSelectorItem item = (PathFinderSelectorItem)AlgorithmSelectorBox.SelectedItem;
-            Type type = item.PathFinderType;
-            return (ICellPathFinder)Activator.CreateInstance(type);
+            if (InvokeRequired)
+            {
+                IAsyncResult result = BeginInvoke(new Func<ICellPathFinder>(InstantiatePathFinder));
+                while (!result.IsCompleted)
+                {
+                    Thread.Sleep(0);
+                }
+
+                return (ICellPathFinder)EndInvoke(result);
+            }
+            else
+            {
+                PathFinderSelectorItem item = (PathFinderSelectorItem)AlgorithmSelectorBox.SelectedItem;
+                Type type = item.PathFinderType;
+                return (ICellPathFinder)Activator.CreateInstance(type);
+            }
         }
 
         private void AddAlgorithms()
@@ -76,11 +97,10 @@ namespace MapAroundPathFinding
             AlgorithmSelectorBox.SelectedIndex = 0;
         }
 
-        private void DrawCellMatrix()
+        private void ResizeWindow(int pictureWidth, int pictureHeight)
         {
-            Bitmap bitmap = _cellMap.ToBitmap();
-            PictureBox.Width = bitmap.Width;
-            PictureBox.Height = bitmap.Height;
+            PictureBox.Width = pictureWidth;
+            PictureBox.Height = pictureHeight;
             Width = PictureBox.Width + PreferencesPanel.Width + 50;
             Height = PictureBox.Height + 70;
 
@@ -88,7 +108,25 @@ namespace MapAroundPathFinding
             int panelX = pictureBoxX + PictureBox.Width + 5;
 
             PreferencesPanel.Location = new Point(panelX, FindPathButton.Location.Y);
+        }
 
+        private void DrawCellMatrix()
+        {
+            int mapWidth = _cellMap.Width;
+            int mapHeight = _cellMap.Height;
+           
+            int scale = (int)Math.Ceiling((double)DefaultWidth / mapWidth);
+
+            if (scale < 1)
+            {
+                scale = 1;
+            }
+
+            ResizeWindow(mapWidth * scale, mapHeight * scale);
+            
+
+            Bitmap bitmap = _cellMap.ToBitmap(scale);
+            _scale = scale;
             RenderBitmap(bitmap);
         }
 
@@ -97,74 +135,132 @@ namespace MapAroundPathFinding
             PictureBox.Image = bitmap;
         }
 
+        private Vector2Int SetPoint(Point mousePosition, Color color)
+        {
+            int x = (int)Math.Round((double)mousePosition.X / _scale);
+            int y = (int)Math.Round((double)mousePosition.Y / _scale);
+            Vector2Int position = new Vector2Int(x, y);
+            if (_cellMap.Width <= position.X)
+            {
+                position.X = _cellMap.Width - 1;
+            }
+
+            if (_cellMap.Height <= position.Y)
+            {
+                position.Y = _cellMap.Height - 1;
+            }
+            
+            Brush brush = new SolidBrush(color);
+            int scaleShift = _scale;
+            int pointWidth = _scale;
+            int pointHeight = _scale;
+            if (pointWidth < 3)
+            {
+                pointWidth = 3;
+            }
+
+            if (pointHeight < 3)
+            {
+                pointHeight = 3;
+            }
+            _pictureBoxGraphics.FillEllipse(brush, position.X * _scale - scaleShift + 1, position.Y * _scale - scaleShift + 1, pointWidth, pointHeight);
+
+            return position;
+        }
+
         private void SetStartPoint(Point startMouse)
         {
-            if (_cellMap.Width <= startMouse.X)
-            {
-                startMouse.X = _cellMap.Width - 1;
-            }
-
-            if (_cellMap.Height <= startMouse.Y)
-            {
-                startMouse.Y = _cellMap.Height - 1;
-            }
-
-            Graphics gr = PictureBox.CreateGraphics();
-            Brush brush = new SolidBrush(Color.Red);
-            gr.FillEllipse(brush, startMouse.X, startMouse.Y, 5, 5);
-
-            _startPoint = new Vector2Int(startMouse.X, startMouse.Y);
+            _startPoint = SetPoint(startMouse, Color.Green);
         }
 
         private void SetStopPoint(Point stopMouse)
         {
-            if (_cellMap.Width <= stopMouse.X)
-            {
-                stopMouse.X = _cellMap.Width - 1;
-            }
-
-            if (_cellMap.Height <= stopMouse.Y)
-            {
-                stopMouse.Y = _cellMap.Height - 1;
-            }
-
-            Graphics gr = PictureBox.CreateGraphics();
-            Brush brush = new SolidBrush(Color.Green);
-            gr.FillEllipse(brush, stopMouse.X, stopMouse.Y, 5, 5);
-
-            _stopPoint = new Vector2Int(stopMouse.X, stopMouse.Y);
+            _stopPoint = SetPoint(stopMouse, Color.Red);
         }
 
         private void FindPath()
         {
-            _stepsEstimate = Math.Abs(_stopPoint.Y - _startPoint.Y) + Math.Abs(_stopPoint.X - _startPoint.X);
+            Task task = new Task(StartPathFinder, TaskCreationOptions.LongRunning);
+            task.Start();
 
-            ICellPathFinder pathFinder = InstantiatePathFinder();
-            pathFinder.OnCellViewedEvent += OnCellViewed;
-            IList<Vector2Int> path = pathFinder.GetPath(_cellMap, _startPoint, _stopPoint, NeighbourMode.SidesAndDiagonals);
-            if (path == null)
+            SetUiEnabled(false);
+        }
+
+        private void DrawPathPoint(Vector2Int pathPoint)
+        {
+            if (InvokeRequired)
             {
-                MessageBox.Show("Path finder", "Path not found!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                BeginInvoke(new Action<Vector2Int>(DrawPathPoint), pathPoint);
             }
             else
             {
-                Graphics graphics = PictureBox.CreateGraphics();
-                Brush brush = new SolidBrush(Color.Blue);
-                foreach (var cell in path)
+                int x = pathPoint.X * _scale - _scale + 1;
+                int y = pathPoint.Y * _scale - _scale + 1;
+                int pointWidth = _scale;
+                int pointHeight = _scale;
+                if (pointWidth < 3)
                 {
-                    graphics.FillEllipse(brush, cell.X, cell.Y, 3, 3);
+                    pointWidth = 3;
+                }
+
+                if (pointHeight < 3)
+                {
+                    pointHeight = 3;
+                }
+                _pictureBoxGraphics.FillEllipse(_pathBrush, x, y, pointWidth, pointHeight);
+            }
+        }
+
+        private void StartPathFinder()
+        {
+            try
+            {
+                _stepsEstimate = Math.Abs(_stopPoint.Y - _startPoint.Y) + Math.Abs(_stopPoint.X - _startPoint.X);
+
+                ICellPathFinder pathFinder = InstantiatePathFinder();
+                pathFinder.OnCellViewedEvent += OnCellViewed;
+                IList<Vector2Int> path =
+                    pathFinder.GetPath(_cellMap, _startPoint, _stopPoint, NeighbourMode.SidesAndDiagonals);
+                if (path == null)
+                {
+                    MessageBox.Show("Path not found!", "Path finder", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                }
+                else
+                {
+                    foreach (var cell in path)
+                    {
+                        DrawPathPoint(cell);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            SetUiEnabled(true);
         }
 
         private void OnCellViewed(object sender, int x, int y, int d)
         {
-            double factor = (double)d / _stepsEstimate;
-            byte green = (byte)(255 * (factor));
-            byte red = (byte)(255 * (1 - factor));
-            Color color = Color.FromArgb(red, green, 0);
-            _reportBrush.Color = color;
-            _pictureBoxGraphics.FillRectangle(_reportBrush, x, y, 1, 1);
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<object, int, int, int>(OnCellViewed), sender, x, y, d);
+            }
+            else
+            {
+                double factor = (double)d / _stepsEstimate;
+                if (factor > 1)
+                    factor = 1;
+                byte green = (byte)(255 * (factor));
+                byte red = (byte)(255 * (1 - factor));
+                Color color = Color.FromArgb(red, green, 0);
+                _reportBrush.Color = color;
+                int scaleHalf = _scale / 2;
+                int drawX = x * _scale - _scale + 1;
+                int drawY = y * _scale - _scale + 1;
+                _pictureBoxGraphics.FillRectangle(_reportBrush, drawX, drawY, _scale, _scale);
+            }
         }
 
         private void PictureBox_Click(object sender, EventArgs e)
@@ -172,6 +268,27 @@ namespace MapAroundPathFinding
             MouseEventArgs me = (MouseEventArgs)e;
             Point coordinates = me.Location;
             OnUserClick(coordinates);
+        }
+
+        private void SetUiEnabled(bool uiEnabled)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<bool>(SetUiEnabled), uiEnabled);
+            }
+            else
+            {
+                FindPathButton.Enabled = uiEnabled;
+                AlgorithmSelectorBox.Enabled = uiEnabled;
+                if (!uiEnabled)
+                {
+                    PictureBox.Click -= PictureBox_Click;
+                }
+                else
+                {
+                    PictureBox.Click += PictureBox_Click;
+                }
+            }
         }
 
         private void OnUserClick(Point coordinates)
