@@ -105,7 +105,7 @@ namespace PathFindingAlgorithms
         static void GetPath(object indexObj)
         {
             int index = (int) indexObj;
-            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop);
+            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop, NeighbourMode.SideOnly);
 
             DrawPath(path, index);
             _runningTasks--;
