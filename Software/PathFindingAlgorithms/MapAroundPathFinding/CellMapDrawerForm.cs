@@ -91,7 +91,7 @@ namespace MapAroundPathFinding
         {
             _stepsEstimate = Math.Abs(_stopPoint.Y - _startPoint.Y) + Math.Abs(_stopPoint.X - _startPoint.X);
 
-            ICellPathFinder pathFinder = new LeeAlgorithm();
+            ICellPathFinder pathFinder = new AStarAlgorithm();
             pathFinder.OnCellViewedEvent += OnCellViewed;
             IList<Vector2Int> path = pathFinder.GetPath(_cellMap, _startPoint, _stopPoint, NeighbourMode.SidesAndDiagonals);
 
