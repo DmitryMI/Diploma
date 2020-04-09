@@ -16,11 +16,11 @@ namespace PathFinders.Algorithms
             public double HValue { get; set; }
             public double GValue { get; set; }
             public double FValue => HValue + GValue;
-            public bool IsExplored { get; set; }
+            public bool IsClosed { get; set; }
             public IGraphNode PathPredecessor { get; set; }
         }
 
-        private void InsertSorted(IList<IGraphNode> nodeList, IGraphNode graph)
+        private void InsertSortedAscending(IList<IGraphNode> nodeList, IGraphNode graph)
         {
             int index = 0;
             while (index < nodeList.Count)
@@ -42,15 +42,15 @@ namespace PathFinders.Algorithms
             nodeList.Insert(index, graph);
         }
 
-        private bool IsExplored(IGraphNode graph)
+        private bool IsClosed(IGraphNode graph)
         {
-            return ((GraphData) graph.Data).IsExplored;
+            return ((GraphData) graph.Data).IsClosed;
         }
 
-        private void MarkExplored(IGraphNode graph)
+        private void CloseNode(IGraphNode graph)
         {
             GraphData data = (GraphData) graph.Data;
-            data.IsExplored = true;
+            data.IsClosed = true;
             graph.Data = data;
         }
 
@@ -158,7 +158,6 @@ namespace PathFinders.Algorithms
         public IList<Vector2Int> GetPath(IGraph map, IGraphNode startNode, IGraphNode stopNode)
         {
             List<IGraphNode> openNodes = new List<IGraphNode>();
-            List<IGraphNode> closedNodes = new List<IGraphNode>();
 
             bool isWeighted = map is IWeightedGraph<double>;
 
@@ -167,7 +166,7 @@ namespace PathFinders.Algorithms
             while (openNodes.Count > 0)
             {
                 //SortFValue(openNodes);
-                IGraphNode x = DequeueFirst(openNodes);
+                IGraphNode x = DequeueLast(openNodes);
                 Vector2Int position = GetPosition(x);
                 OnCellViewedEvent?.Invoke(this, position.X, position.Y, (int)GetGValue(x));
                 if (x == stopNode)
@@ -175,16 +174,18 @@ namespace PathFinders.Algorithms
                     break;
                 }
 
-                closedNodes.Add(x);
+                CloseNode(x);
 
                 foreach (var y in x.GetConnectedNodes())
                 {
-                    if (closedNodes.Contains(y))
+                    if (IsClosed(y))
                     {
                         continue;
                     }
 
-                    if (!openNodes.Contains(y))
+                    int yIndex = openNodes.IndexOf(y);
+
+                    if (yIndex == -1)
                     {
                         SetPathPredecessor(y, x);
                         double nodesDistance;
@@ -200,7 +201,9 @@ namespace PathFinders.Algorithms
                         SetGValue(y, GetGValue(x) + nodesDistance);
                         double estimateDistance = GetEstimateDistance(y, stopNode);
                         SetHValue(y, estimateDistance);
-                        openNodes.Add(y);
+                        //InsertSortedDescending(openNodes, y);
+                        Utils.InsertSortedDescending(openNodes, y, this);
+                        //openNodes.Add(y);
                     }
                     else
                     {
@@ -219,6 +222,8 @@ namespace PathFinders.Algorithms
                         {
                             SetGValue(y, xGValue);
                             SetPathPredecessor(y, x);
+                            openNodes.RemoveAt(yIndex);
+                            Utils.InsertSortedDescending(openNodes, y, this);
                         }
                     }
                 }
@@ -295,13 +300,13 @@ namespace PathFinders.Algorithms
             }
         }
 
-        public int Compare(IGraphNode x, IGraphNode y)
+        public int Compare(IGraphNode aGraphNode, IGraphNode bGraphNode)
         {
-            if (x == null || y == null)
+            if (aGraphNode == null || bGraphNode == null)
                 return 0;
-            GraphData xData = (GraphData) x.Data;
-            GraphData yData = (GraphData) y.Data;
-            if (xData.FValue >= yData.FValue)
+            GraphData aData = (GraphData) aGraphNode.Data;
+            GraphData bData = (GraphData) bGraphNode.Data;
+            if (aData.FValue >= bData.FValue)
                 return 1;
             return -1;
         }

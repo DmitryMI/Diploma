@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PathFinders.Algorithms
 {
-    static class Utils
+    public static class Utils
     {
         public static ICollection<T> GetItemsBytIndexes<T>(T[] array, params int[] indexes)
         {
@@ -41,6 +41,33 @@ namespace PathFinders.Algorithms
             }
 
             return result;
+        }
+
+        public static void InsertSortedDescending<T>(IList<T> list, T value, IComparer<T> comparer)
+        {
+            if (list.Count == 0)
+            {
+                list.Add(value);
+                return;
+            }
+
+            int index = list.Count - 1;
+            while (index >= 0)
+            {
+                int comparison = comparer.Compare(value, list[index]);
+
+                if (comparison > 0)
+                {
+                    index--;
+                }
+                else
+                {
+                    
+                    break;
+                }
+            }
+            index++;
+            list.Insert(index, value);
         }
        
     }

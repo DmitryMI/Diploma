@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace PathFindingAlgorithms
             Console.WriteLine("Press any key to start...");
             Console.ReadKey();
 
-            FileStream mapFileStream = File.Open("Maps/vadim_maze.cmap", FileMode.Open, FileAccess.Read);
+            FileStream mapFileStream = File.Open("Maps/wall.cmap", FileMode.Open, FileAccess.Read);
 
             ConsoleMap map = ConsoleMapGenerator.FromText(mapFileStream, 'S', 'E', 'X', '.');
             _map = map;
@@ -77,6 +78,14 @@ namespace PathFindingAlgorithms
             InitConsoleDrawer(map, scale, spacing, start, stop, 1);
 
             Console.SetCursorPosition(0, map.Height * scale.Y);
+
+            AStarAlgorithm aStarTest = new AStarAlgorithm();
+            var path = aStarTest.GetPath(_map, start, stop, NeighbourMode.SideOnly);
+            if (path != null)
+            {
+                Console.WriteLine("Path was found");
+                DrawPath(path, 0);
+            }
 
             _contestants[0] = new BestFirstSearch();
             _contestants[0].OnCellViewedEvent += OnCellUpdated;
