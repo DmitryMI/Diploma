@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 using PathFinders;
 using PathFinders.Algorithms;
+using PathFinders.Graphs;
+using PathFinders.Graphs.SimpleTypes;
 using PathFindingAlgorithms.ConsolePathFinding;
 
 
@@ -77,10 +79,10 @@ namespace PathFindingAlgorithms
 
             Console.SetCursorPosition(0, map.Height * scale.Y);
 
-            _contestants[0] = new DijkstraAlgorithm();
+            _contestants[0] = new BestFirstSearch();
             _contestants[0].OnCellViewedEvent += OnCellUpdated;
 
-            _contestants[1] = new BestFirstSearch();
+            _contestants[1] = new AStarAlgorithm();
             _contestants[1].OnCellViewedEvent += OnCellUpdated;
 
             StartPathFinder(0);
@@ -105,7 +107,7 @@ namespace PathFindingAlgorithms
         static void GetPath(object indexObj)
         {
             int index = (int) indexObj;
-            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop, NeighbourMode.SideOnly);
+            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop, NeighbourMode.SidesAndDiagonals);
 
             DrawPath(path, index);
             _runningTasks--;
@@ -135,7 +137,7 @@ namespace PathFindingAlgorithms
             _consoleDrawers[index].SetTextCell(x, y, dStr);
             _consoleDrawers[index].Update();
 
-            Thread.Sleep(10);
+            Thread.Sleep(100);
         }
 
     }

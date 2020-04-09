@@ -64,10 +64,14 @@ namespace MapAroundPathFinding
             featureLayer.PointStyle.Size = 10;
             featureLayer.PointStyle.Symbol = '*';
 
+            //featureLayer.MaxVisibleScale = 0;
+            featureLayer.MinVisibleScale = 3000;
+
             if (shapeFilePath.EndsWith("roads.shp"))
             {
                 featureLayer.Alias = "roads";
                 featureLayer.PolylineStyle.Color = Color.Chocolate;
+                
             }
             else if (shapeFilePath.EndsWith("buildings.shp"))
             {
@@ -90,6 +94,7 @@ namespace MapAroundPathFinding
                 featureLayer.Alias = "natural";
                 featureLayer.PolygonStyle.BorderColor = Color.Green;
                 featureLayer.PolygonStyle.FillForeColor = Color.LightGreen;
+                featureLayer.MinVisibleScale = 0;
             }
             else if (shapeFilePath.EndsWith("railways.shp"))
             {

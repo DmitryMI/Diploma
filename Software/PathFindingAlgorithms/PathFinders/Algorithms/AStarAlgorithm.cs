@@ -234,7 +234,7 @@ namespace PathFinders.Algorithms
             if (neighbourMode == NeighbourMode.SideOnly)
             {
                 GraphNode[,] graphNodes = GraphGenerator.GetGraph(map, neighbourMode);
-
+                IGraphNode[,] nodesInterface = new IGraphNode[map.Width, map.Height];
                 for (int i = 0; i < map.Width; i++)
                 {
                     for (int j = 0; j < map.Height; j++)
@@ -243,16 +243,15 @@ namespace PathFinders.Algorithms
                             continue;
                         graphNodes[i, j].Data = new GraphData();
                         SetPosition(graphNodes[i, j], new Vector2Int(i, j));
+                        nodesInterface[i, j] = graphNodes[i, j];
                     }
                 }
 
                 IGraphNode startNode = graphNodes[start.X, start.Y];
                 IGraphNode stopNode = graphNodes[stop.X, stop.Y];
+                
 
-                IGraphNode[] nodes = new IGraphNode[graphNodes.Length];
-                graphNodes.CopyTo(nodes, 0);
-
-                Graph graph = new Graph(nodes);
+                Graph graph = new Graph(nodesInterface);
 
                 return GetPath(graph, startNode, stopNode);
             }

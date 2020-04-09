@@ -6,12 +6,15 @@ namespace PathFindingAlgorithms.ConsolePathFinding
     public class ConsoleMap : ICellMap
     {
         private readonly bool[,] _cells;
+
         public bool IsPassable(int x, int y)
         {
             if (!IsInBounds(x, y))
                 return false;
 
-            return _cells[x, y];
+            bool value = _cells[x, y];
+
+            return value;
         }
 
         public bool IsInBounds(int x, int y)
