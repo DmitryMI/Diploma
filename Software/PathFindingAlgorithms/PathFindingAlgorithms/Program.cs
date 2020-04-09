@@ -77,7 +77,7 @@ namespace PathFindingAlgorithms
 
             Console.SetCursorPosition(0, map.Height * scale.Y);
 
-            _contestants[0] = new AStarAlgorithm();
+            _contestants[0] = new DijkstraAlgorithm();
             _contestants[0].OnCellViewedEvent += OnCellUpdated;
 
             _contestants[1] = new BestFirstSearch();

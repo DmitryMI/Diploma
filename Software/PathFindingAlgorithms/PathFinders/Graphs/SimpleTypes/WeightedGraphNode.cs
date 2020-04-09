@@ -23,7 +23,11 @@ namespace PathFinders.Graphs.SimpleTypes
         {
             int index = IndexOf((WeightedGraphNode<T>)node);
             if (index < 0)
-                throw new ArgumentException("Node is not connected");
+            {
+                return InfinityWeight;
+                //throw new ArgumentException("Node is not connected");
+            }
+
             return _weights[index];
         }
 

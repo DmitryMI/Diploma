@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -35,6 +36,44 @@ namespace MapAroundPathFinding
             DrawCellMatrix();
 
             _pictureBoxGraphics = PictureBox.CreateGraphics();
+
+            AddAlgorithms();
+        }
+
+        private class PathFinderSelectorItem
+        {
+            public Type PathFinderType { get; set; }
+            public override string ToString()
+            {
+                return PathFinderType.Name;
+            }
+
+            public PathFinderSelectorItem(Type t)
+            {
+                PathFinderType = t;
+            }
+        }
+
+        private ICellPathFinder InstantiatePathFinder()
+        {
+            PathFinderSelectorItem item = (PathFinderSelectorItem)AlgorithmSelectorBox.SelectedItem;
+            Type type = item.PathFinderType;
+            return (ICellPathFinder)Activator.CreateInstance(type);
+        }
+
+        private void AddAlgorithms()
+        {
+            var cellPathFinderInterface = typeof(ICellPathFinder);
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(p => cellPathFinderInterface.IsAssignableFrom(p) && p != cellPathFinderInterface);
+
+            foreach (var type in types)
+            {
+                AlgorithmSelectorBox.Items.Add(new PathFinderSelectorItem(type));
+            }
+
+            AlgorithmSelectorBox.SelectedIndex = 0;
         }
 
         private void DrawCellMatrix()
@@ -42,13 +81,13 @@ namespace MapAroundPathFinding
             Bitmap bitmap = _cellMap.ToBitmap();
             PictureBox.Width = bitmap.Width;
             PictureBox.Height = bitmap.Height;
-            Width = PictureBox.Width + FindPathButton.Width + 50;
+            Width = PictureBox.Width + PreferencesPanel.Width + 50;
             Height = PictureBox.Height + 70;
 
             int pictureBoxX = PictureBox.Location.X;
-            int buttonX = pictureBoxX + PictureBox.Width + 5;
+            int panelX = pictureBoxX + PictureBox.Width + 5;
 
-            FindPathButton.Location = new Point(buttonX, FindPathButton.Location.Y);
+            PreferencesPanel.Location = new Point(panelX, FindPathButton.Location.Y);
 
             RenderBitmap(bitmap);
         }
@@ -100,15 +139,21 @@ namespace MapAroundPathFinding
         {
             _stepsEstimate = Math.Abs(_stopPoint.Y - _startPoint.Y) + Math.Abs(_stopPoint.X - _startPoint.X);
 
-            ICellPathFinder pathFinder = new AStarAlgorithm();
+            ICellPathFinder pathFinder = InstantiatePathFinder();
             pathFinder.OnCellViewedEvent += OnCellViewed;
             IList<Vector2Int> path = pathFinder.GetPath(_cellMap, _startPoint, _stopPoint, NeighbourMode.SidesAndDiagonals);
-
-            Graphics graphics = PictureBox.CreateGraphics();
-            Brush brush = new SolidBrush(Color.Blue);
-            foreach (var cell in path)
+            if (path == null)
             {
-                graphics.FillEllipse(brush, cell.X, cell.Y, 3, 3);
+                MessageBox.Show("Path finder", "Path not found!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            }
+            else
+            {
+                Graphics graphics = PictureBox.CreateGraphics();
+                Brush brush = new SolidBrush(Color.Blue);
+                foreach (var cell in path)
+                {
+                    graphics.FillEllipse(brush, cell.X, cell.Y, 3, 3);
+                }
             }
         }
 
