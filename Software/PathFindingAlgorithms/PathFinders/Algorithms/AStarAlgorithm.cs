@@ -12,9 +12,9 @@ namespace PathFinders.Algorithms
 
         private struct GraphData
         {
-            public int HValue { get; set; }
-            public int GValue { get; set; }
-            public int FValue => HValue + GValue;
+            public double HValue { get; set; }
+            public double GValue { get; set; }
+            public double FValue => HValue + GValue;
             public bool IsExplored { get; set; }
             public IGraphNode PathPredecessor { get; set; }
             public Vector2Int Position { get; set; }
@@ -67,32 +67,32 @@ namespace PathFinders.Algorithms
             return data.PathPredecessor;
         }
 
-        private void SetGValue(IGraphNode node, int g)
+        private void SetGValue(IGraphNode node, double g)
         {
             GraphData data = (GraphData)node.Data;
             data.GValue = g;
             node.Data = data;
         }
 
-        private int GetGValue(IGraphNode node)
+        private double GetGValue(IGraphNode node)
         {
             GraphData data = (GraphData)node.Data;
             return data.GValue;
         }
 
-        private int GetFValue(IGraphNode node)
+        private double GetFValue(IGraphNode node)
         {
             GraphData data = (GraphData)node.Data;
             return data.FValue;
         }
 
-        private int GetHValue(IGraphNode node)
+        private double GetHValue(IGraphNode node)
         {
             GraphData data = (GraphData)node.Data;
             return data.HValue;
         }
 
-        private void SetHValue(IGraphNode node, int h)
+        private void SetHValue(IGraphNode node, double h)
         {
             GraphData data = (GraphData)node.Data;
             data.HValue = h;
@@ -111,15 +111,15 @@ namespace PathFinders.Algorithms
             return firstNode;
         }
 
-        private int GetEstimateDistance(IGraphNode graphA, IGraphNode graphB)
+        private double GetEstimateDistance(IGraphNode graphA, IGraphNode graphB)
         {
             Vector2Int a = GetPosition(graphA);
             Vector2Int b = GetPosition(graphB);
             double dx = a.X - b.X;
             double dy = a.Y - b.Y;
-            return (int)(Math.Abs(dx) + Math.Abs(dy));
+            return (Math.Abs(dx) + Math.Abs(dy));
 
-            //return (int)Math.Round(Math.Sqrt(dx * dx + dy * dy));
+            //return Math.Sqrt(dx*dx + dy*dy);
         }
 
         private Vector2Int GetPosition(IGraphNode node)
@@ -147,7 +147,7 @@ namespace PathFinders.Algorithms
                 SortFValue(openNodes);
                 IGraphNode x = DequeueFirst(openNodes);
                 Vector2Int position = GetPosition(x);
-                OnCellViewedEvent?.Invoke(this, position.X, position.Y, GetGValue(x));
+                OnCellViewedEvent?.Invoke(this, position.X, position.Y, (int)GetGValue(x));
                 if (x == stopNode)
                 {
                     break;
@@ -166,15 +166,15 @@ namespace PathFinders.Algorithms
                     {
                         SetPathPredecessor(y, x);
                         SetGValue(y, GetGValue(x) + 1);
-                        int estimateDistance = GetEstimateDistance(y, stopNode);
+                        double estimateDistance = GetEstimateDistance(y, stopNode);
                         SetHValue(y, estimateDistance);
                         //InsertSorted(openNodes, y);
                         openNodes.Add(y);
                     }
                     else
                     {
-                        int xGValue = GetGValue(x) + 1;
-                        int yGValue = GetGValue(y);
+                        double xGValue = GetGValue(x) + 1;
+                        double yGValue = GetGValue(y);
                         if (xGValue < yGValue)
                         {
                             SetGValue(y, xGValue);
@@ -233,7 +233,9 @@ namespace PathFinders.Algorithms
                 return 0;
             GraphData xData = (GraphData) x.Data;
             GraphData yData = (GraphData) y.Data;
-            return xData.FValue - yData.FValue;
+            if (xData.FValue >= yData.FValue)
+                return 1;
+            return -1;
         }
     }
 }
