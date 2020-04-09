@@ -58,7 +58,7 @@ namespace PathFindingAlgorithms
             Console.WriteLine("Press any key to start...");
             Console.ReadKey();
 
-            FileStream mapFileStream = File.Open("Maps/trap.cmap", FileMode.Open, FileAccess.Read);
+            FileStream mapFileStream = File.Open("Maps/vadim_maze.cmap", FileMode.Open, FileAccess.Read);
 
             ConsoleMap map = ConsoleMapGenerator.FromText(mapFileStream, 'S', 'E', 'X', '.');
             _map = map;
@@ -71,7 +71,6 @@ namespace PathFindingAlgorithms
             _stop = stop;
             Vector2Int scale = new Vector2Int(4, 2);
             int spacing = 4;
-
             
 
             InitConsoleDrawer(map, scale, spacing, start, stop, 0);
@@ -107,7 +106,7 @@ namespace PathFindingAlgorithms
         static void GetPath(object indexObj)
         {
             int index = (int) indexObj;
-            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop, NeighbourMode.SidesAndDiagonals);
+            IList<Vector2Int> path = _contestants[index].GetPath(_map, _start, _stop, NeighbourMode.SideOnly);
 
             DrawPath(path, index);
             _runningTasks--;

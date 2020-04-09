@@ -13,6 +13,9 @@
     <None Update="Maps\trap.cmap">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Maps\vadim_maze.cmap">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Maps\wall.cmap">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

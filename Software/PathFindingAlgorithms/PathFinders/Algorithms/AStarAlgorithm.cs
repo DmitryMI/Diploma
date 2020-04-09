@@ -111,6 +111,13 @@ namespace PathFinders.Algorithms
             return firstNode;
         }
 
+        private IGraphNode DequeueLast(IList<IGraphNode> nodeList)
+        {
+            var node = nodeList[nodeList.Count - 1];
+            nodeList.RemoveAt(nodeList.Count - 1);
+            return node;
+        }
+
         private double GetEstimateDistance(IGraphNode graphA, IGraphNode graphB)
         {
             Vector2Int a = GetPosition(graphA);
@@ -159,7 +166,7 @@ namespace PathFinders.Algorithms
 
             while (openNodes.Count > 0)
             {
-                SortFValue(openNodes);
+                //SortFValue(openNodes);
                 IGraphNode x = DequeueFirst(openNodes);
                 Vector2Int position = GetPosition(x);
                 OnCellViewedEvent?.Invoke(this, position.X, position.Y, (int)GetGValue(x));
@@ -193,12 +200,20 @@ namespace PathFinders.Algorithms
                         SetGValue(y, GetGValue(x) + nodesDistance);
                         double estimateDistance = GetEstimateDistance(y, stopNode);
                         SetHValue(y, estimateDistance);
-                        //InsertSorted(openNodes, y);
                         openNodes.Add(y);
                     }
                     else
                     {
-                        double xGValue = GetGValue(x) + 1;
+                        double nodesDistance;
+                        if (isWeighted)
+                        {
+                            nodesDistance = GetConnectionWeight((IWeightedGraphNode<double>)x, (IWeightedGraphNode<double>)y);
+                        }
+                        else
+                        {
+                            nodesDistance = GetConnectionWeight(x, y);
+                        }
+                        double xGValue = GetGValue(x) + nodesDistance;
                         double yGValue = GetGValue(y);
                         if (xGValue < yGValue)
                         {

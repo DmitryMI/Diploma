@@ -104,7 +104,7 @@ namespace PathFinders.Graphs
             return nodes;
         }
 
-        public static WeightedGraph<double> GetWeightedGraph(ICellMap map, NeighbourMode neighbourMode)
+        public static WeightedGraph<double>GetWeightedGraph(ICellMap map, NeighbourMode neighbourMode)
         {
             WeightedGraphNode<double>[,] nodes = new WeightedGraphNode<double>[map.Width,map.Height];
 
