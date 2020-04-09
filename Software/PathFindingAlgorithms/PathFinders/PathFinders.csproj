@@ -44,6 +44,7 @@
     <Compile Include="Algorithms\AStarAlgorithm.cs" />
     <Compile Include="Algorithms\BestFirstSearch.cs" />
     <Compile Include="Algorithms\DijkstraAlgorithm.cs" />
+    <Compile Include="Graphs\IWeightedGraphPathFinder.cs" />
     <Compile Include="Graphs\SimpleTypes\Graph.cs" />
     <Compile Include="Graphs\GraphGenerator.cs" />
     <Compile Include="Graphs\SimpleTypes\GraphNode.cs" />
@@ -52,13 +53,14 @@
     <Compile Include="Graphs\IGraphPathFinder.cs" />
     <Compile Include="Graphs\IWeightedGraph.cs" />
     <Compile Include="Graphs\IWeightedGraphNode.cs" />
+    <Compile Include="Graphs\SimpleTypes\WeightedGraph.cs" />
     <Compile Include="ICellMap.cs" />
     <Compile Include="ICellPathFinder.cs" />
     <Compile Include="Algorithms\LeeAlgorithm.cs" />
     <Compile Include="NeighbourMode.cs" />
     <Compile Include="Steps.cs" />
     <Compile Include="Vector2Int.cs" />
-    <Compile Include="Graphs\SimpleTypes\WeightedGraph.cs" />
+    <Compile Include="Graphs\SimpleTypes\MatrixWeightedGraph.cs" />
     <Compile Include="Graphs\SimpleTypes\WeightedGraphNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

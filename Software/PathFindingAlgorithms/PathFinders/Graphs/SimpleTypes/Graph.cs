@@ -6,6 +6,8 @@ namespace PathFinders.Graphs.SimpleTypes
     {
         private readonly IGraphNode[,] _graphNodes;
 
+        protected IGraphNode[,] GraphNodes => _graphNodes;
+
         public int Width => _graphNodes.GetLength(0);
         public int Height => _graphNodes.GetLength(1);
 

@@ -1,86 +1,57 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace PathFinders.Graphs.SimpleTypes
 {
-    public class WeightedGraph<T> : IWeightedGraph<T>
+    public class WeightedGraph<T> : Graph, IWeightedGraph<T>
     {
-        private readonly T[,] _weights;
 
-        public int Count { get; }
-
-        public T InfinityWeight { get; set; }
-        public WeightedGraph(int count, T infinityValue)
+        public WeightedGraph(int width, int height, T infinityWeight) : base(new IGraphNode[width,height])
         {
-            _weights = new T[count, count];
-            Count = count;
-            for (int i = 0; i < count; i++)
-            {
-                for (int j = 0; j < count; j++)
-                {
-                    _weights[i, j] = infinityValue;
-                }
-            }
+            InfinityWeight = infinityWeight;
+        }
+        public WeightedGraph(IGraphNode[] graphNodes, T infinityWeight) : base(graphNodes)
+        {
+            InfinityWeight = infinityWeight;
         }
 
-        public WeightedGraph(T[,] weights)
+        public WeightedGraph(IGraphNode[,] graphNodes, T infinityWeight) : base(graphNodes)
         {
-            _weights = weights;
-            Count = weights.GetLength(0);
+            InfinityWeight = infinityWeight;
         }
 
-        public void SetWeightSymmetrical(int from, int to, T weight)
-        {
-            SetWeight(from, to, weight);
-            SetWeight(to, from, weight);
-        }
-
-        public void SetWeight(int from, int to, T weight)
-        {
-            _weights[from, to] = weight;
-        }
-
-        public T GetWeight(int from, int to)
-        {
-            return _weights[from, to];
-        }
-
-        public T this[int from, int to] => GetWeight(from, to);
         public ICollection<IWeightedGraphNode<T>> GetWeightedGraphNodes()
         {
-            List<IWeightedGraphNode<T>> result = new List<IWeightedGraphNode<T>>(Count);
+            IWeightedGraphNode<T>[] nodes = new IWeightedGraphNode<T>[Width * Height];
 
-            for (int i = 0; i < Count; i++)
+            for (int x = 0; x < Width; x++)
             {
-                WeightedGraphNode<T> node = new WeightedGraphNode<T>(InfinityWeight);
-                result.Add(node);
-            }
-
-            for (int i = 0; i < Count; i++)
-            {
-                WeightedGraphNode<T> node = (WeightedGraphNode<T>)result[i];
-
-                for (int j = 0; j < Count; j++)
+                for (int y = 0; y < Height; y++)
                 {
-                    WeightedGraphNode<T> connection  = (WeightedGraphNode<T>)result[i];
-                    node.Add(connection);
-                    node.SetWeight(node.Count - 1, _weights[i, j]);
+                    nodes[y * Width + x] = (IWeightedGraphNode<T>) GraphNodes[x, y];
                 }
             }
 
-            return result;
+            return nodes;
         }
 
-        public ICollection<IGraphNode> GetGraphNodes()
+        private IWeightedGraphNode<T> GetByIndex(int nodeIndex)
         {
-            ICollection<IWeightedGraphNode<T>> nodes = GetWeightedGraphNodes();
-
-            List<IGraphNode> result = new List<IGraphNode>(nodes.Count);
-            foreach (var node in nodes)
-            {
-                result.Add(node);
-            }
-
-            return result;
+            int y = nodeIndex / Width;
+            int x = nodeIndex - y * Width;
+            return (IWeightedGraphNode<T>) GraphNodes[x, y];
         }
+
+        public T GetWeight(int nodeAIndex, int nodeBIndex)
+        {
+            IWeightedGraphNode<T> nodeA = GetByIndex(nodeAIndex);
+            IWeightedGraphNode<T> nodeB = GetByIndex(nodeBIndex);
+            return nodeA.GetWeight(nodeB);
+        }
+
+        public T InfinityWeight { get; set; }
     }
 }

@@ -19,12 +19,32 @@ namespace PathFinders.Graphs.SimpleTypes
             return _weights[connectionIndex];
         }
 
-        public T GetWeight(WeightedGraphNode<T> node)
+        public T GetWeight(IWeightedGraphNode<T> node)
         {
-            int index = IndexOf(node);
+            int index = IndexOf((WeightedGraphNode<T>)node);
             if (index < 0)
                 throw new ArgumentException("Node is not connected");
             return _weights[index];
+        }
+
+        public void SetWeight(IWeightedGraphNode<T> connection, T weight)
+        {
+            int connectionIndex = Connections.IndexOf((GraphNode)connection);
+            if (connectionIndex == -1)
+            {
+                Connections.Add((GraphNode)connection);
+                _weights.Add(weight);
+            }
+            else
+            {
+                _weights[connectionIndex] = weight;
+            }
+            
+        }
+
+        public int GetConnectionIndex(IWeightedGraphNode<T> connection)
+        {
+            return Connections.IndexOf((GraphNode)connection);
         }
 
         public void SetWeight(int connectionIndex, T weight)

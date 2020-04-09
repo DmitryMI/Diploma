@@ -40,6 +40,15 @@ namespace MapAroundPathFinding
         private void DrawCellMatrix()
         {
             Bitmap bitmap = _cellMap.ToBitmap();
+            PictureBox.Width = bitmap.Width;
+            PictureBox.Height = bitmap.Height;
+            Width = PictureBox.Width + FindPathButton.Width + 50;
+            Height = PictureBox.Height + 70;
+
+            int pictureBoxX = PictureBox.Location.X;
+            int buttonX = pictureBoxX + PictureBox.Width + 5;
+
+            FindPathButton.Location = new Point(buttonX, FindPathButton.Location.Y);
 
             RenderBitmap(bitmap);
         }

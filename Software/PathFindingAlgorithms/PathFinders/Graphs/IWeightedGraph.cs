@@ -6,6 +6,8 @@ namespace PathFinders.Graphs
     {
         ICollection<IWeightedGraphNode<T>> GetWeightedGraphNodes();
 
+        T GetWeight(int nodeA, int nodeB);
+
         T InfinityWeight { get; set; }
     }
 }

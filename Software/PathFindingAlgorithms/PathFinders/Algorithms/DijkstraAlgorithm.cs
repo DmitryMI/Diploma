@@ -20,7 +20,7 @@ namespace PathFinders.Algorithms
 
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
-            WeightedGraph<int> weightedGraph = GraphGenerator.GetWeightedGraph(map, neighbourMode);
+            WeightedGraph<double> weightedGraph = GraphGenerator.GetWeightedGraph(map, neighbourMode);
 
             int GetNodeIndex(int x, int y) => y * map.Width + x;
             Vector2Int GetNodePosition(int index)
@@ -32,32 +32,33 @@ namespace PathFinders.Algorithms
 
             void SetArrayValue<T>(T[] array, int x, int y, T value) => array[GetNodeIndex(x, y)] = value;
 
-            int[] distances = new int[weightedGraph.Count];
-            bool[] used = new bool[weightedGraph.Count];
-            int[] prev = new int[weightedGraph.Count];
+            int count = weightedGraph.Width * weightedGraph.Height;
+            double[] distances = new double[count];
+            bool[] used = new bool[count];
+            int[] prev = new int[count];
             FillArray(distances, Int32.MaxValue);
             FillArray(prev, -1);
             FillArray(used, false); // Can be removed
             
             SetArrayValue(distances, start.X, start.Y, 0);
             
-            int minDistance = 0;
+            double minDistance = 0;
             int minVertex = GetNodeIndex(start.X, start.Y);
 
             while (minDistance < Int32.MaxValue)
             {
                 int i = minVertex;
                 used[i] = true;
-                for (int j = 0; j < weightedGraph.Count; j++)
+                for (int j = 0; j < count; j++)
                 {
-                    int distanceI = distances[i];
-                    int distanceJ = distances[j];
-                    int weightIj = weightedGraph[i, j];
-                    if (weightIj == int.MaxValue)
+                    double distanceI = distances[i];
+                    double distanceJ = distances[j];
+                    double weightIj = weightedGraph.GetWeight(i, j);
+                    if (double.IsPositiveInfinity(weightIj))
                         continue;
 
-                    int nDistance;
-                    if (distanceI == int.MaxValue)
+                    double nDistance;
+                    if (double.IsPositiveInfinity(distanceI))
                     {
                         nDistance = Int32.MaxValue;
                     }
@@ -72,11 +73,11 @@ namespace PathFinders.Algorithms
                         distances[j] = distanceJ;
                         prev[j] = i;
                         Vector2Int nodePosition = GetNodePosition(j);
-                        OnCellViewedEvent?.Invoke(this, nodePosition.X, nodePosition.Y, distanceJ);
+                        OnCellViewedEvent?.Invoke(this, nodePosition.X, nodePosition.Y, (int)distanceJ);
                     }
                 }
-                minDistance = Int32.MaxValue;
-                for (int j = 0; j < weightedGraph.Count; j++)
+                minDistance = Double.PositiveInfinity;
+                for (int j = 0; j < count; j++)
                 {
                     if (!used[j] && distances[j] < minDistance)
                     {
