@@ -201,9 +201,7 @@ namespace PathFinders.Algorithms
                         SetGValue(y, GetGValue(x) + nodesDistance);
                         double estimateDistance = GetEstimateDistance(y, stopNode);
                         SetHValue(y, estimateDistance);
-                        //InsertSortedDescending(openNodes, y);
                         Utils.InsertSortedDescending(openNodes, y, this);
-                        //openNodes.Add(y);
                     }
                     else
                     {
