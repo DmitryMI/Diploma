@@ -16,7 +16,7 @@ namespace PathFinders.Algorithms.HpaStar
 
         public HierarchicalMap HierarchicalGraph { get; set; }
 
-        public int ClusterSizeZero { get; set; } = 8;
+        public int ClusterSizeZero { get; set; } = 16;
 
         private CellCluster _currentCellCluster;
 
