@@ -152,10 +152,17 @@ namespace PathFinders.Algorithms
 
         public IList<Vector2Int> GetPath(IWeightedGraph<double> map, IWeightedGraphNode<double> start, IWeightedGraphNode<double> stop)
         {
-            return GetPath((IGraph)map, start, stop);
+            var nodePath = GetPath((IGraph)map, start, stop);
+            List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
+            foreach (var node in nodePath)
+            {
+                path.Add(node.Position);
+            }
+
+            return path;
         }
 
-        public IList<Vector2Int> GetPath(IGraph map, IGraphNode startNode, IGraphNode stopNode)
+        public IList<IGraphNode> GetPath(IGraph map, IGraphNode startNode, IGraphNode stopNode)
         {
             List<IGraphNode> openNodes = new List<IGraphNode>();
 
@@ -232,15 +239,15 @@ namespace PathFinders.Algorithms
                 return null;
             }
 
-            List<Vector2Int> path = new List<Vector2Int>();
-            path.Add(GetPosition(stopNode));
+            List<IGraphNode> path = new List<IGraphNode>();
+            path.Add(stopNode);
             IGraphNode currentNode = stopNode;
             while (true)
             {
                 currentNode = GetPathPredecessor(currentNode);
                 if (currentNode == null)
                     break;
-                path.Add(GetPosition(currentNode));
+                path.Add(currentNode);
             }
 
 
@@ -271,7 +278,14 @@ namespace PathFinders.Algorithms
 
                 Graph graph = new Graph(nodesInterface);
 
-                return GetPath(graph, startNode, stopNode);
+                var nodePath = GetPath(graph, startNode, stopNode);
+                List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
+                foreach (var node in nodePath)
+                {
+                    path.Add(node.Position);
+                }
+
+                return path;
             }
             else
             {

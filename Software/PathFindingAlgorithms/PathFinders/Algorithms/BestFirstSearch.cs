@@ -56,7 +56,7 @@ namespace PathFinders.Algorithms
             node.Data = data;
         }
 
-        public IList<Vector2Int> GetPath(IGraph graph, IGraphNode startNode, IGraphNode stopNode)
+        public IList<IGraphNode> GetPath(IGraph graph, IGraphNode startNode, IGraphNode stopNode)
         {
             List<IGraphNode> openNodes = new List<IGraphNode> {startNode};
 
@@ -97,14 +97,14 @@ namespace PathFinders.Algorithms
                 return null;
             }
 
-            List<Vector2Int> path = new List<Vector2Int>();
+            List<IGraphNode> path = new List<IGraphNode>();
 
             IGraphNode currentPathNode = stopNode;
-            path.Add(currentPathNode.Position);
+            path.Add(currentPathNode);
             while (currentPathNode != startNode)
             {
                 currentPathNode = GetData<GraphData>(currentPathNode).ParentNode;
-                path.Add(currentPathNode.Position);
+                path.Add(currentPathNode);
             }
 
             return path;
@@ -135,7 +135,14 @@ namespace PathFinders.Algorithms
                 node.Data = new GraphData(){DistanceToStop = GetDistance(node.Position, stop)};
             }
 
-            return GetPath(graph, startNode, stopNode);
+            var nodePath = GetPath(graph, startNode, stopNode);
+            List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
+            foreach (var node in nodePath)
+            {
+                path.Add(node.Position);
+            }
+
+            return path;
         }
 
         public int Compare(IGraphNode a, IGraphNode b)
