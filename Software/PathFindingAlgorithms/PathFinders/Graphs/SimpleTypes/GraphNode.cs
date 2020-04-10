@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PathFinders.Graphs.SimpleTypes
 {
-    public class GraphNode : IList<GraphNode>, IGraphNode
+    public class GraphNode : IGraphNode, ICollection<IGraphNode>
     {
         private List<GraphNode> _connections = new List<GraphNode>();
 
@@ -11,13 +11,7 @@ namespace PathFinders.Graphs.SimpleTypes
 
         public ICollection<IGraphNode> GetConnectedNodes()
         {
-            IGraphNode[] connectedNodes = new IGraphNode[_connections.Count];
-            for (int i = 0; i < connectedNodes.Length; i++)
-            {
-                connectedNodes[i] = _connections[i];
-            }
-
-            return connectedNodes;
+            return this;
         }
 
         public Vector2Int Position { get; set; }
@@ -30,40 +24,39 @@ namespace PathFinders.Graphs.SimpleTypes
         
 
         public List<GraphNode> Connections => _connections;
-
-        public IEnumerator<GraphNode> GetEnumerator()
-        {
-            return _connections.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable) _connections).GetEnumerator();
-        }
+        
 
         public virtual void Add(GraphNode item)
         {
             _connections.Add(item);
         }
 
-        public virtual void Clear()
+        public void Add(IGraphNode item)
+        {
+            _connections.Add((GraphNode)item);
+        }
+
+        public void Clear()
         {
             _connections.Clear();
         }
 
-        public bool Contains(GraphNode item)
+        public bool Contains(IGraphNode item)
         {
-            return _connections.Contains(item);
+            return _connections.Contains((GraphNode)item);
         }
 
-        public void CopyTo(GraphNode[] array, int arrayIndex)
+        public void CopyTo(IGraphNode[] array, int arrayIndex)
         {
-            _connections.CopyTo(array, arrayIndex);
+            for (int i = 0; i < _connections.Count; i++)
+            {
+                array[arrayIndex + i] = _connections[i];
+            }
         }
 
-        public virtual bool Remove(GraphNode item)
+        public bool Remove(IGraphNode item)
         {
-            return _connections.Remove(item);
+            return _connections.Remove((GraphNode)item);
         }
 
         public int Count => _connections.Count;
@@ -74,21 +67,21 @@ namespace PathFinders.Graphs.SimpleTypes
         {
             return _connections.IndexOf(item);
         }
-
-        public virtual void Insert(int index, GraphNode item)
-        {
-            _connections.Insert(index, item);
-        }
-
-        public virtual void RemoveAt(int index)
-        {
-            _connections.RemoveAt(index);
-        }
-
+        
         public GraphNode this[int index]
         {
             get => _connections[index];
             set => _connections[index] = value;
+        }
+
+        public IEnumerator<IGraphNode> GetEnumerator()
+        {
+            return new GraphNodeEnumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

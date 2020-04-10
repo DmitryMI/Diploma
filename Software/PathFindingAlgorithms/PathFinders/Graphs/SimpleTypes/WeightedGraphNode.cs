@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PathFinders.Graphs.SimpleTypes
 {
-    public class WeightedGraphNode<T> : GraphNode, IWeightedGraphNode<T>
+    public class WeightedGraphNode<T> : GraphNode, IWeightedGraphNode<T>, ICollection<IWeightedGraphNode<T>>
     {
         private List<T> _weights = new List<T>();
 
@@ -63,21 +63,13 @@ namespace PathFinders.Graphs.SimpleTypes
             node.SetWeight(this, weight);
         }
 
-        public void SetWeightSymmetrical(WeightedGraphNode<T> node, T weight)
+        public void SetWeightSymmetrical(IWeightedGraphNode<T> node, T weight)
         {
-            int index = IndexOf(node);
+            int index = IndexOf((WeightedGraphNode<T>)node);
             if (index < 0)
                 throw new ArgumentException("Node is not connected");
             _weights[index] = weight;
             node.SetWeight(this, weight);
-        }
-
-        public void SetWeight(WeightedGraphNode<T> node, T weight)
-        {
-            int index = IndexOf(node);
-            if(index < 0)
-                throw new ArgumentException("Node is not connected");
-            _weights[index] = weight;
         }
 
         public override void Add(GraphNode item)
@@ -86,44 +78,9 @@ namespace PathFinders.Graphs.SimpleTypes
             Weights.Add(InfinityWeight);
         }
 
-        public override void Clear()
-        {
-            Weights.Clear();
-            Connections.Clear();
-        }
-
-        public override bool Remove(GraphNode item)
-        {
-            int index = IndexOf(item);
-            if (index < 0)
-                return false;
-            Connections.RemoveAt(index);
-            _weights.RemoveAt(index);
-            return true;
-        }
-    
-
-        public override void Insert(int index, GraphNode item)
-        {
-            Connections.Insert(index, item);
-            Weights.Insert(index, InfinityWeight);
-        }
-
-        public override void RemoveAt(int index)
-        {
-            Weights.RemoveAt(index);
-            Connections.RemoveAt(index);
-        }
-
         public ICollection<IWeightedGraphNode<T>> GetConnectedWeightedNodes()
         {
-            List<IWeightedGraphNode<T>> result = new List<IWeightedGraphNode<T>>(Connections.Count);
-            foreach (var connection in Connections)
-            {
-                result.Add((IWeightedGraphNode<T>)connection);
-            }
-
-            return result;
+            return this;
         }
 
         public ICollection<T> GetConnectionWeights()
@@ -132,5 +89,32 @@ namespace PathFinders.Graphs.SimpleTypes
         }
 
         public T InfinityWeight { get; set; }
+        public new IEnumerator<IWeightedGraphNode<T>> GetEnumerator()
+        {
+            return new WeightedGraphNodeEnumerator<T>(this);
+        }
+
+        public void Add(IWeightedGraphNode<T> item)
+        {
+            base.Add(item);
+        }
+
+        public bool Contains(IWeightedGraphNode<T> item)
+        {
+            return base.Contains(item);
+        }
+
+        public void CopyTo(IWeightedGraphNode<T>[] array, int arrayIndex)
+        {
+            for (int i = 0; i < Connections.Count; i++)
+            {
+                array[arrayIndex + i] = (IWeightedGraphNode<T>) Connections[i];
+            }
+        }
+
+        public bool Remove(IWeightedGraphNode<T> item)
+        {
+            return base.Remove(item);
+        }
     }
 }
