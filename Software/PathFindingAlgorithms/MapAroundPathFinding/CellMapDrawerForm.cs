@@ -34,6 +34,8 @@ namespace MapAroundPathFinding
 
         private int _scale;
 
+        private ICellPathFinder _currentPathFinder;
+
         public CellMapDrawerForm(MapAroundCellMap cellMap)
         {
             InitializeComponent();
@@ -180,6 +182,9 @@ namespace MapAroundPathFinding
 
         private void FindPath()
         {
+            //StartPathFinder();
+            //return;
+
             Task task = new Task(StartPathFinder, TaskCreationOptions.LongRunning);
             task.Start();
 
@@ -217,7 +222,7 @@ namespace MapAroundPathFinding
             {
                 _stepsEstimate = Math.Abs(_stopPoint.Y - _startPoint.Y) + Math.Abs(_stopPoint.X - _startPoint.X);
 
-                ICellPathFinder pathFinder = InstantiatePathFinder();
+                ICellPathFinder pathFinder = _currentPathFinder;
                 pathFinder.OnCellViewedEvent += OnCellViewed;
                 IList<Vector2Int> path =
                     pathFinder.GetPath(_cellMap, _startPoint, _stopPoint, NeighbourMode.SidesAndDiagonals);
@@ -236,6 +241,8 @@ namespace MapAroundPathFinding
             catch (Exception ex)
             {
                 MessageBox.Show("Error", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Debug.WriteLine(ex.StackTrace);
+                throw;
             }
 
             SetUiEnabled(true);
@@ -313,6 +320,11 @@ namespace MapAroundPathFinding
         private void FindPathButton_Click(object sender, EventArgs e)
         {
             FindPath();
+        }
+
+        private void AlgorithmSelectorBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _currentPathFinder = InstantiatePathFinder();
         }
     }
 }

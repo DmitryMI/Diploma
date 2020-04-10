@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
+using PathFinders.Algorithms.HpaStar;
 using PathFinders.Graphs.Hierarchical;
 using PathFinders.Graphs.Hierarchical.SimpleTypes;
 
@@ -71,7 +73,7 @@ namespace MapAroundPathFinding
             LaunchHpaStar();
         }
 
-        private void DrawLevelOneNodes(List<IHierarchicalGraphNode<double>> nodes)
+        private void DrawLevelOneNodes(List<HierarchicalGraphNode> nodes)
         {
             List<Vector2Int> positions = new List<Vector2Int>(nodes.Count);
             for (int i = 0; i < nodes.Count; i++)
@@ -93,7 +95,7 @@ namespace MapAroundPathFinding
             }
         }
 
-        private void DrawLevelOneNode(IHierarchicalGraphNode<double> node, Color color)
+        private void DrawLevelOneNode(HierarchicalGraphNode node, Color color)
         {
             Vector2Int pos = node.Position;
             int xScaled = pos.X * _scale;
@@ -102,7 +104,7 @@ namespace MapAroundPathFinding
             
         }
 
-        private void DrawLevelOneConnections(List<IHierarchicalGraphNode<double>> nodes)
+        private void DrawLevelOneConnections(List<HierarchicalGraphNode> nodes)
         {
             foreach (var node in nodes)
             {
@@ -131,21 +133,59 @@ namespace MapAroundPathFinding
 
         private void LaunchHpaStar()
         {
-            var hierarchyGraph = HierarchicalGraphGenerator.GenerateGraph(_cellMap, NeighbourMode.SideOnly, 8);
+            int clusterSize = 8;
+            var hierarchyGraph = HierarchicalMapGenerator.GenerateMap(_cellMap, NeighbourMode.SideOnly, clusterSize);
 
             DrawLevelOneNodes(hierarchyGraph.Nodes);
 
-            DrawLevelOneConnections(hierarchyGraph.Nodes);
+            //DrawLevelOneConnections(hierarchyGraph.Nodes);
 
-            CellCluster[,] clusters = HierarchicalGraphGenerator.GeneratedClusters;
+            CellCluster[,] clusters = HierarchicalMapGenerator.GeneratedClusters;
 
             for (int x = 0; x < clusters.GetLength(0); x++)
             {
                 for (int y = 0; y < clusters.GetLength(1); y++)
                 {
-                    DrawClusterBorders(clusters[x, y]);
+                    //DrawClusterBorders(clusters[x, y]);
                 }
             }
+
+            HpaStarAlgorithm hpa = new HpaStarAlgorithm();
+            hpa.HierarchicalGraph = hierarchyGraph;
+            hpa.ClusterSizeZero = clusterSize;
+            hpa.OnCellViewedEvent += OnCellViewed;
+
+            IList<Vector2Int> path = hpa.GetPath(_cellMap, _cellMap.DefaultStart, _cellMap.DefaultStop,
+                NeighbourMode.SidesAndDiagonals);
+
+            DrawPath(path);
+        }
+
+        private void DrawLine(Vector2Int from, Vector2Int to)
+        {
+            int fromX = from.X * _scale + _scale / 2;
+            int fromY = from.Y * _scale + _scale / 2;
+            int toX = to.X * _scale + _scale / 2;
+            int toY = to.Y * _scale + _scale / 2;
+            _graphics.DrawLine(new Pen(Color.DarkRed, 2), fromX, fromY, toX, toY);
+        }
+
+        private void DrawPath(IList<Vector2Int> path)
+        {
+            for (var i = 0; i < path.Count - 1; i++)
+            {
+                var cellA = path[i];
+                var cellB = path[i + 1];
+                DrawLine(cellA, cellB);
+            }
+        }
+
+        private void OnCellViewed(object sender, int x, int y, int d)
+        {
+            int xScaled = x * _scale;
+            int yScaled = y * _scale;
+            _graphics.FillEllipse(new SolidBrush(Color.DarkGreen), xScaled, yScaled, _scale / 2, _scale / 2);
+            //Thread.Sleep(100);
         }
     }
 }

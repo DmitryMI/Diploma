@@ -8,22 +8,25 @@ using PathFinders.Graphs.SimpleTypes;
 
 namespace PathFinders.Graphs.Hierarchical.SimpleTypes
 {
-    public class HierarchicalGraph<T> : IHierarchicalGraph<T>
+    public class HierarchicalMap
     {
-        private List<IHierarchicalGraphNode<T>> _nodes = new List<IHierarchicalGraphNode<T>>();
-        public HierarchicalGraph(HierarchicalGraphNode<T>[] nodes, T infinityWeight)
+        private List<HierarchicalGraphNode> _nodes = new List<HierarchicalGraphNode>();
+
+        public CellCluster[,] ZeroLevelClusters { get; set; }
+
+        public HierarchicalMap(HierarchicalGraphNode[] nodes)
         {
             _nodes.AddRange(nodes);
         }
 
-        public HierarchicalGraph(T infinityWeight)
+        public HierarchicalMap()
         {
-            InfinityWeight = InfinityWeight;
+           
         }
 
 
         public int Level { get; set; }
-        public ICollection<IHierarchicalGraphNode<T>> GetHierarchicalGraphNodes()
+        public ICollection<HierarchicalGraphNode> GetHierarchicalGraphNodes()
         {
             return _nodes;
         }
@@ -44,19 +47,8 @@ namespace PathFinders.Graphs.Hierarchical.SimpleTypes
             get => throw new NotImplementedException();
             set => throw new NotImplementedException();
         }
+       
 
-        public ICollection<IWeightedGraphNode<T>> GetWeightedGraphNodes()
-        {
-            throw new NotImplementedException();
-        }
-
-        public T GetWeight(int nodeA, int nodeB)
-        {
-            throw new NotImplementedException();
-        }
-
-        public T InfinityWeight { get; set; }
-
-        public List<IHierarchicalGraphNode<T>> Nodes => _nodes;
+        public List<HierarchicalGraphNode> Nodes => _nodes;
     }
 }

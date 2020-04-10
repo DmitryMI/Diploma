@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace PathFinders.Graphs.Hierarchical.SimpleTypes
 {
-    public class HierarchicalGraphEnumerator<T> : IEnumerator<IHierarchicalGraphNode<T>>
+    public class HierarchicalMapEnumerator : IEnumerator<HierarchicalGraphNode>
     {
         private readonly IGraphNode[,] _nodeMatrix;
         private int _currentX, _currentY;
 
-        public HierarchicalGraphEnumerator(IGraphNode[,] nodeMatrix)
+        public HierarchicalMapEnumerator(IGraphNode[,] nodeMatrix)
         {
             _nodeMatrix = nodeMatrix;
         }
@@ -44,7 +44,7 @@ namespace PathFinders.Graphs.Hierarchical.SimpleTypes
             _currentY = 0;
         }
 
-        public IHierarchicalGraphNode<T> Current => (IHierarchicalGraphNode<T>) _nodeMatrix[_currentX, _currentY];
+        public HierarchicalGraphNode Current => (HierarchicalGraphNode) _nodeMatrix[_currentX, _currentY];
         object IEnumerator.Current => _nodeMatrix[_currentX, _currentY];
     }
 }

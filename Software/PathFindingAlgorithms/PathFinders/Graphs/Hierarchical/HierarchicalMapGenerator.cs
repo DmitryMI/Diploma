@@ -8,13 +8,19 @@ using PathFinders.Graphs.Hierarchical.SimpleTypes;
 
 namespace PathFinders.Graphs.Hierarchical
 {
-    public static class HierarchicalGraphGenerator
+    public static class HierarchicalMapGenerator
     {
-        public static HierarchicalGraph<double> GenerateGraph(ICellMap cellMap, NeighbourMode neighbourMode, params int[] clusterSizes)
+        public static Action<object, int, int, int> CellViewedCallback { get; set; }
+
+        public static CellCluster[,] GeneratedClusters { get; set; }
+
+        private static CellCluster _currentCellCluster;
+
+        public static HierarchicalMap GenerateMap(ICellMap cellMap, NeighbourMode neighbourMode, params int[] clusterSizes)
         {
             if (clusterSizes.Length == 1)
             {
-                return GenerateTwoLevelGraph(cellMap, neighbourMode, clusterSizes[0]);
+                return GenerateTwoLevelMap(cellMap, neighbourMode, clusterSizes[0]);
             }
 
             throw new NotImplementedException();
@@ -38,8 +44,7 @@ namespace PathFinders.Graphs.Hierarchical
                 {
                     int yBorderDelta = map.Height - currentY;
                     int actualHeight = yBorderDelta >= clusterSize ? clusterSize : yBorderDelta;
-
-                    Debug.WriteLine($"actualHeight: {actualHeight}");
+                    
                     CellCluster cluster = new CellCluster()
                     {
                         Width =  actualWidth,
@@ -75,8 +80,6 @@ namespace PathFinders.Graphs.Hierarchical
                 return true;
             }
 
-            int pointCount = 0;
-
             while (IsInsideCluster(xCurrent, yCurrent))
             {
                 while (!map.IsPassable(xCurrent, yCurrent) ||
@@ -93,11 +96,14 @@ namespace PathFinders.Graphs.Hierarchical
                 aPoints.Add(new Vector2Int(xCurrent, yCurrent));
                 bPoints.Add(new Vector2Int(xCurrent + bOffset.X, yCurrent + bOffset.Y));
 
-                pointCount++;
-                Debug.WriteLine($"Point count: {pointCount}");
-
+              
                 xCurrent += delta.X;
                 yCurrent += delta.Y;
+
+                if (!IsInsideCluster(xCurrent, yCurrent))
+                {
+                    break;
+                }
 
                 while (map.IsPassable(xCurrent, yCurrent) && map.IsPassable(xCurrent + bOffset.X, yCurrent + bOffset.Y))
                 {
@@ -119,8 +125,6 @@ namespace PathFinders.Graphs.Hierarchical
                 {
                     aPoints.Add(aPoint);
                     bPoints.Add(bPoint);
-                    pointCount++;
-                    Debug.WriteLine($"Point count: {pointCount}");
                 }
             }
         }
@@ -169,7 +173,7 @@ namespace PathFinders.Graphs.Hierarchical
             GetTransitionCells(clusterA, clusterB, start, delta, bOffset, aPoints, bPoints);
         }
 
-        private static void ProceedNeighbourClusters(CellCluster currentCluster, CellCluster neighbourCluster, HierarchicalGraph<double> graph)
+        private static void ProceedNeighbourClusters(CellCluster currentCluster, CellCluster neighbourCluster, HierarchicalMap graph)
         {
             List<Vector2Int> currentPoints = new List<Vector2Int>(2);
             List<Vector2Int> neighbourPoints = new List<Vector2Int>(2);
@@ -178,20 +182,20 @@ namespace PathFinders.Graphs.Hierarchical
             {
                 var currentPoint = currentPoints[k];
                 var neighbourPoint = neighbourPoints[k];
-                HierarchicalGraphNode<double> transitionNodeCurrent, transitionNodeNeighbour;
+                HierarchicalGraphNode transitionNodeCurrent, transitionNodeNeighbour;
 
-                transitionNodeCurrent = (HierarchicalGraphNode<double>)currentCluster.TransitionNodes.FirstOrDefault(node => node.Position == currentPoint);
-                transitionNodeNeighbour = (HierarchicalGraphNode<double>)neighbourCluster.TransitionNodes.FirstOrDefault(node => node.Position == neighbourPoint);
+                transitionNodeCurrent = (HierarchicalGraphNode)currentCluster.TransitionNodes.FirstOrDefault(node => node.Position == currentPoint);
+                transitionNodeNeighbour = (HierarchicalGraphNode)neighbourCluster.TransitionNodes.FirstOrDefault(node => node.Position == neighbourPoint);
                 if (transitionNodeCurrent == null)
                 {
-                    transitionNodeCurrent = new HierarchicalGraphNode<double>(Double.PositiveInfinity);
+                    transitionNodeCurrent = new HierarchicalGraphNode();
                     currentCluster.TransitionNodes.Add(transitionNodeCurrent);
                     graph.Nodes.Add(transitionNodeCurrent);
                 }
 
                 if (transitionNodeNeighbour == null)
                 {
-                    transitionNodeNeighbour = new HierarchicalGraphNode<double>(Double.PositiveInfinity);
+                    transitionNodeNeighbour = new HierarchicalGraphNode();
                     neighbourCluster.TransitionNodes.Add(transitionNodeNeighbour);
                     graph.Nodes.Add(transitionNodeNeighbour);
                 }
@@ -201,17 +205,20 @@ namespace PathFinders.Graphs.Hierarchical
 
                 transitionNodeCurrent.Position = currentPoint;
                 transitionNodeNeighbour.Position = neighbourPoint;
+
+                transitionNodeCurrent.ParentCluster = currentCluster;
+                transitionNodeNeighbour.ParentCluster = neighbourCluster;
             }
         }
 
-        public static CellCluster[,] GeneratedClusters { get; set; }
+        
 
-        private static HierarchicalGraph<double>  GenerateTwoLevelGraph(ICellMap cellMap, NeighbourMode neighbourMode, int levelZeroClusterSize)
+        private static HierarchicalMap GenerateTwoLevelMap(ICellMap cellMap, NeighbourMode neighbourMode, int levelZeroClusterSize)
         {
             CellCluster[,] clusterMatrix = CreateClusters(cellMap, levelZeroClusterSize);
             GeneratedClusters = clusterMatrix;
             
-            HierarchicalGraph<double> levelOneGraph = new HierarchicalGraph<double>(Double.PositiveInfinity);
+            HierarchicalMap levelOneMap = new HierarchicalMap();
             for (int i = 0; i < clusterMatrix.GetLength(0); i++)
             {
                 for (int j = 0; j < clusterMatrix.GetLength(1); j++)
@@ -223,17 +230,17 @@ namespace PathFinders.Graphs.Hierarchical
                     if (prevI >= 0)
                     {
                         CellCluster neighbourCluster = clusterMatrix[prevI, j];
-                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneGraph);
+                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneMap);
                     }
                     if (prevJ >= 0)
                     {
                         CellCluster neighbourCluster = clusterMatrix[i, prevJ];
-                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneGraph);
+                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneMap);
                     }
                     if (prevJ >= 0 && prevI >= 0 && neighbourMode == NeighbourMode.SidesAndDiagonals)
                     {
                         CellCluster neighbourCluster = clusterMatrix[prevI, prevJ];
-                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneGraph);
+                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneMap);
                     }
                 }
             }
@@ -242,11 +249,19 @@ namespace PathFinders.Graphs.Hierarchical
             {
                 for (int j = 0; j < clusterMatrix.GetLength(1); j++)
                 {
-                    clusterMatrix[i, j].CalculatePaths(neighbourMode);
+                    _currentCellCluster = clusterMatrix[i, j];
+                    clusterMatrix[i, j].CalculatePaths(neighbourMode, OnCellClusterCellViewed);
                 }
             }
 
-            return levelOneGraph;
+            levelOneMap.ZeroLevelClusters = clusterMatrix;
+
+            return levelOneMap;
+        }
+
+        private static void OnCellClusterCellViewed(object sender, int x, int y, int d)
+        {
+            CellViewedCallback?.Invoke(sender, x + _currentCellCluster.LeftBottom.X, y + _currentCellCluster.LeftBottom.Y, d);
         }
     }
 }
