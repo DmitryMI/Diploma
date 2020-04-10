@@ -76,7 +76,7 @@ namespace PathFinders.Graphs.SimpleTypes
 
         public IEnumerator<IGraphNode> GetEnumerator()
         {
-            return new GraphNodeEnumerator(this);
+            return new GraphNodeEnumerator<GraphNode>(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

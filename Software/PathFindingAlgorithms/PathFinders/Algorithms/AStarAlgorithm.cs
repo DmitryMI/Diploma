@@ -164,6 +164,9 @@ namespace PathFinders.Algorithms
 
         public IList<IGraphNode> GetPath(IGraph map, IGraphNode startNode, IGraphNode stopNode)
         {
+            if (startNode == null || stopNode == null)
+                return null;
+            
             List<IGraphNode> openNodes = new List<IGraphNode>();
 
             bool isWeighted = map is IWeightedGraph<double>;
@@ -279,6 +282,8 @@ namespace PathFinders.Algorithms
                 Graph graph = new Graph(nodesInterface);
 
                 var nodePath = GetPath(graph, startNode, stopNode);
+                if (nodePath == null)
+                    return null;
                 List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
                 foreach (var node in nodePath)
                 {

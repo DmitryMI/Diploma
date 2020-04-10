@@ -34,6 +34,7 @@
             this.ErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.LayerSettings = new System.Windows.Forms.Button();
             this.GetCellMapButton = new System.Windows.Forms.Button();
+            this.HpaTestingButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.MainStatusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -106,11 +107,22 @@
             this.GetCellMapButton.UseVisualStyleBackColor = true;
             this.GetCellMapButton.Click += new System.EventHandler(this.GetCellMapButton_Click);
             // 
+            // HpaTestingButton
+            // 
+            this.HpaTestingButton.Location = new System.Drawing.Point(1017, 99);
+            this.HpaTestingButton.Name = "HpaTestingButton";
+            this.HpaTestingButton.Size = new System.Drawing.Size(152, 23);
+            this.HpaTestingButton.TabIndex = 6;
+            this.HpaTestingButton.Text = "HPA*";
+            this.HpaTestingButton.UseVisualStyleBackColor = true;
+            this.HpaTestingButton.Click += new System.EventHandler(this.HpaTestingButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1181, 589);
+            this.Controls.Add(this.HpaTestingButton);
             this.Controls.Add(this.GetCellMapButton);
             this.Controls.Add(this.LayerSettings);
             this.Controls.Add(this.MainStatusStrip);
@@ -135,5 +147,6 @@
         private System.Windows.Forms.ToolStripStatusLabel ErrorLabel;
         private System.Windows.Forms.Button LayerSettings;
         private System.Windows.Forms.Button GetCellMapButton;
+        private System.Windows.Forms.Button HpaTestingButton;
     }
 }

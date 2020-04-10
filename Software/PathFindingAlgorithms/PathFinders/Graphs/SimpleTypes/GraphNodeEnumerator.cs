@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PathFinders.Graphs.SimpleTypes
 {
-    public class GraphNodeEnumerator : IEnumerator<IGraphNode>
+    public class GraphNodeEnumerator<T> : IEnumerator<T> where T: GraphNode
     {
         private int _currentindex = -1;
 
-        private GraphNode _node;
+        private T _node;
 
-        public GraphNodeEnumerator(GraphNode node)
+        public GraphNodeEnumerator(T node)
         {
             _node = node;
         }
 
         public void Dispose()
         {
-            
+
         }
 
         public bool MoveNext()
@@ -39,7 +35,7 @@ namespace PathFinders.Graphs.SimpleTypes
             _currentindex = -1;
         }
 
-        public IGraphNode Current => _node[_currentindex];
+        public T Current => (T)_node[_currentindex];
         object IEnumerator.Current => _node[_currentindex];
     }
 }

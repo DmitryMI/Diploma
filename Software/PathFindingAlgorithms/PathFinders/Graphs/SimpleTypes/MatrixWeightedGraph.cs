@@ -91,5 +91,11 @@ namespace PathFinders.Graphs.SimpleTypes
 
             return result;
         }
+
+        public IGraphNode this[Vector2Int position]
+        {
+            get => throw new System.NotImplementedException();
+            set => throw new System.NotImplementedException();
+        }
     }
 }

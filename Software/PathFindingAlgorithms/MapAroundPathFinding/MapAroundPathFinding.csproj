@@ -52,6 +52,14 @@
     <Compile Include="CellMapDrawerForm.Designer.cs">
       <DependentUpon>CellMapDrawerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HpaStarTesting\HpaTestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HpaStarTesting\HpaTestForm.Designer.cs">
+      <DependentUpon>HpaTestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HpaStarTesting\SimpleCellMap.cs" />
+    <Compile Include="HpaStarTesting\StringMapBuilder.cs" />
     <Compile Include="LayerSettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -71,6 +79,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="CellMapDrawerForm.resx">
       <DependentUpon>CellMapDrawerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HpaStarTesting\HpaTestForm.resx">
+      <DependentUpon>HpaTestForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LayerSettingsForm.resx">
       <DependentUpon>LayerSettingsForm.cs</DependentUpon>

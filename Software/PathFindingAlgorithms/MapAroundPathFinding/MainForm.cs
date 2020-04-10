@@ -209,5 +209,11 @@ namespace MapAroundPathFinding
             CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
             drawerForm.Show();
         }
+
+        private void HpaTestingButton_Click(object sender, EventArgs e)
+        {
+            HpaTestForm testForm = new HpaTestForm(null);
+            testForm.Show();
+        }
     }
 }

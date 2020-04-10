@@ -69,6 +69,20 @@ namespace PathFinders.Algorithms
             index++;
             list.Insert(index, value);
         }
+
+        public static List<T> GetInvertedList<T>(IList<T> list)
+        {
+            if (list == null)
+                return null;
+            List<T> result = new List<T>(list.Count);
+
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                result.Add(list[i]);
+            }
+
+            return result;
+        }
        
     }
 }
