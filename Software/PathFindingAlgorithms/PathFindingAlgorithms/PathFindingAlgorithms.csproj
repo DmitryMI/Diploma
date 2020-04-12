@@ -10,6 +10,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Maps\emtpy.cmap">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Maps\trap.cmap">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

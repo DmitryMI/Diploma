@@ -159,9 +159,9 @@ namespace MapAroundPathFinding
         private void OpenMapButton_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog folderBrowser = new FolderBrowserDialog();
-#if DEBUG
+//#if DEBUG
             folderBrowser.SelectedPath = "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Data\\Wichita\\shape";
-#endif
+//#endif
             folderBrowser.ShowDialog();
 
             if(String.IsNullOrEmpty(folderBrowser.SelectedPath))
@@ -208,6 +208,12 @@ namespace MapAroundPathFinding
             cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
             CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
             drawerForm.Show();
+        }
+
+        private void HpaTestingButton_Click(object sender, EventArgs e)
+        {
+            HpaTestForm testForm = new HpaTestForm(null);
+            testForm.Show();
         }
     }
 }

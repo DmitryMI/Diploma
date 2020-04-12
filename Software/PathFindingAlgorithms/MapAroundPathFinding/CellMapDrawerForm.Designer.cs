@@ -73,6 +73,7 @@
             this.AlgorithmSelectorBox.Name = "AlgorithmSelectorBox";
             this.AlgorithmSelectorBox.Size = new System.Drawing.Size(118, 21);
             this.AlgorithmSelectorBox.TabIndex = 2;
+            this.AlgorithmSelectorBox.SelectedIndexChanged += new System.EventHandler(this.AlgorithmSelectorBox_SelectedIndexChanged);
             // 
             // CellMapDrawerForm
             // 

@@ -44,7 +44,18 @@
     <Compile Include="Algorithms\AStarAlgorithm.cs" />
     <Compile Include="Algorithms\BestFirstSearch.cs" />
     <Compile Include="Algorithms\DijkstraAlgorithm.cs" />
+    <Compile Include="Algorithms\HpaStar\HpaStarAlgorithm.cs" />
+    <Compile Include="Algorithms\PathSmoother.cs" />
+    <Compile Include="Algorithms\PathSmoothing\BrezenghemLine.cs" />
     <Compile Include="Algorithms\Utils.cs" />
+    <Compile Include="Graphs\Hierarchical\HierarchicalMapGenerator.cs" />
+    <Compile Include="Graphs\Hierarchical\ICellCluster.cs" />
+    <Compile Include="Graphs\Hierarchical\SimpleTypes\CellCluster.cs" />
+    <Compile Include="Graphs\Hierarchical\SimpleTypes\CoordinateTransformer.cs" />
+    <Compile Include="Graphs\Hierarchical\SimpleTypes\HierarchicalGraphEnumerator.cs" />
+    <Compile Include="Graphs\SimpleTypes\GraphNodeEnumerator.cs" />
+    <Compile Include="Graphs\Hierarchical\SimpleTypes\HierarchicalMap.cs" />
+    <Compile Include="Graphs\Hierarchical\SimpleTypes\HierarchicalGraphNode.cs" />
     <Compile Include="Graphs\IWeightedGraphPathFinder.cs" />
     <Compile Include="Graphs\SimpleTypes\Graph.cs" />
     <Compile Include="Graphs\GraphGenerator.cs" />
@@ -54,7 +65,6 @@
     <Compile Include="Graphs\IGraphPathFinder.cs" />
     <Compile Include="Graphs\IWeightedGraph.cs" />
     <Compile Include="Graphs\IWeightedGraphNode.cs" />
-    <Compile Include="Graphs\SimpleTypes\GraphNodeEnumerator.cs" />
     <Compile Include="Graphs\SimpleTypes\WeightedGraph.cs" />
     <Compile Include="Graphs\SimpleTypes\WeightedGraphNodeEnumerator.cs" />
     <Compile Include="ICellMap.cs" />

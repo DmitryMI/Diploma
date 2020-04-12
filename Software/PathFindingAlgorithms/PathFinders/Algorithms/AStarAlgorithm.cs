@@ -9,7 +9,6 @@ namespace PathFinders.Algorithms
     public class AStarAlgorithm : ICellPathFinder, IGraphPathFinder, IWeightedGraphPathFinder<double>, IComparer<IGraphNode>
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
-        
 
         private struct GraphData
         {
@@ -42,20 +41,32 @@ namespace PathFinders.Algorithms
             nodeList.Insert(index, graph);
         }
 
-        private bool IsClosed(IGraphNode graph)
+        private bool IsClosed(IGraphNode node)
         {
-            return ((GraphData) graph.Data).IsClosed;
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
+            return ((GraphData) node.Data).IsClosed;
         }
 
-        private void CloseNode(IGraphNode graph)
+        private void CloseNode(IGraphNode node)
         {
-            GraphData data = (GraphData) graph.Data;
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
+            GraphData data = (GraphData) node.Data;
             data.IsClosed = true;
-            graph.Data = data;
+            node.Data = data;
         }
 
         private void SetPathPredecessor(IGraphNode node, IGraphNode predecessor)
         {
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
             GraphData data = (GraphData)node.Data;
             data.PathPredecessor = predecessor;
             node.Data = data;
@@ -63,12 +74,20 @@ namespace PathFinders.Algorithms
 
         private IGraphNode GetPathPredecessor(IGraphNode node)
         {
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
             GraphData data = (GraphData)node.Data;
             return data.PathPredecessor;
         }
 
         private void SetGValue(IGraphNode node, double g)
         {
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
             GraphData data = (GraphData)node.Data;
             data.GValue = g;
             node.Data = data;
@@ -76,24 +95,21 @@ namespace PathFinders.Algorithms
 
         private double GetGValue(IGraphNode node)
         {
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
             GraphData data = (GraphData)node.Data;
             return data.GValue;
         }
-
-        private double GetFValue(IGraphNode node)
-        {
-            GraphData data = (GraphData)node.Data;
-            return data.FValue;
-        }
-
-        private double GetHValue(IGraphNode node)
-        {
-            GraphData data = (GraphData)node.Data;
-            return data.HValue;
-        }
+        
 
         private void SetHValue(IGraphNode node, double h)
         {
+            if (node.Data == null)
+            {
+                node.Data = new GraphData();
+            }
             GraphData data = (GraphData)node.Data;
             data.HValue = h;
             node.Data = data;
@@ -150,23 +166,21 @@ namespace PathFinders.Algorithms
             return weightedNodeA.GetWeight(weightedNodeB);
         }
 
-        public IList<Vector2Int> GetPath(IWeightedGraph<double> map, IWeightedGraphNode<double> start, IWeightedGraphNode<double> stop)
+        public IList<IGraphNode> GetPath(IWeightedGraph<double> map, IWeightedGraphNode<double> start, IWeightedGraphNode<double> stop)
         {
             var nodePath = GetPath((IGraph)map, start, stop);
-            List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
-            foreach (var node in nodePath)
-            {
-                path.Add(node.Position);
-            }
 
-            return path;
+            return nodePath;
         }
 
         public IList<IGraphNode> GetPath(IGraph map, IGraphNode startNode, IGraphNode stopNode)
         {
+            if (startNode == null || stopNode == null)
+                return null;
+            
             List<IGraphNode> openNodes = new List<IGraphNode>();
 
-            bool isWeighted = map is IWeightedGraph<double>;
+            bool isWeighted = startNode is IWeightedGraphNode<double>;
 
             openNodes.Add(startNode);
 
@@ -279,6 +293,8 @@ namespace PathFinders.Algorithms
                 Graph graph = new Graph(nodesInterface);
 
                 var nodePath = GetPath(graph, startNode, stopNode);
+                if (nodePath == null)
+                    return null;
                 List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
                 foreach (var node in nodePath)
                 {
@@ -308,7 +324,16 @@ namespace PathFinders.Algorithms
                     }
                 }
 
-                return GetPath(graph, startNode, stopNode);
+                var nodePath = GetPath(graph, startNode, stopNode);
+                if (nodePath == null)
+                    return null;
+                List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
+                foreach (var node in nodePath)
+                {
+                    path.Add(node.Position);
+                }
+
+                return path;
             }
         }
 

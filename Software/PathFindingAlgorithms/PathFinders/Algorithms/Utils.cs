@@ -43,6 +43,36 @@ namespace PathFinders.Algorithms
             return result;
         }
 
+        public static int[] GetIndexesByFilters<T>(ICollection<T> collection, params Func<T, bool>[] filters)
+        {
+            int[] result = new int[filters.Length];
+            for (int i = 0; i < filters.Length; i++)
+            {
+                result[i] = -1;
+            }
+            bool[] filterPassed = new bool[filters.Length];
+            int index = 0;
+            foreach (var item in collection)
+            {
+                for (int i = 0; i < filters.Length; i++)
+                {
+                    if (filterPassed[i])
+                    {
+                        continue;
+                    }
+                    if (filters[i](item))
+                    {
+                        result[i] = index;
+                        filterPassed[i] = true;
+                    }
+                }
+
+                index++;
+            }
+
+            return result;
+        }
+
         public static void InsertSortedDescending<T>(IList<T> list, T value, IComparer<T> comparer)
         {
             if (list.Count == 0)
@@ -68,6 +98,20 @@ namespace PathFinders.Algorithms
             }
             index++;
             list.Insert(index, value);
+        }
+
+        public static List<T> GetInvertedList<T>(IList<T> list)
+        {
+            if (list == null)
+                return null;
+            List<T> result = new List<T>(list.Count);
+
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                result.Add(list[i]);
+            }
+
+            return result;
         }
        
     }
