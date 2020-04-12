@@ -237,6 +237,8 @@ namespace MapAroundPathFinding
                 DrawPathPoint(cell, Color.Blue, 1);
             }
 
+            Debug.WriteLine($"Raw path length: {path.Count}");
+
             PathSmoother smoother = new PathSmoother();
             smoother.OnObstacleDetectedEvent += OnSmootherObstacleDetected;
             IList<Vector2Int> smoothedPath = smoother.GetSmoothedPath(_cellMap, path);
@@ -244,6 +246,8 @@ namespace MapAroundPathFinding
             {
                 DrawPathPoint(cell, Color.DarkCyan, 3);
             }
+
+            Debug.WriteLine($"Smoothed path length: {path.Count}");
         }
 
         private void StartPathFinder()
@@ -263,6 +267,7 @@ namespace MapAroundPathFinding
                 else
                 {
                     DrawPath(path);
+                    
                 }
             }
             catch (Exception ex)

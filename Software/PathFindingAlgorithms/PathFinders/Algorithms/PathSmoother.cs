@@ -12,20 +12,22 @@ namespace PathFinders.Algorithms
     {
         // TODO Check if line is not built near the obstacle
 
-        public event Action<int, int> OnObstacleDetectedEvent; 
+        public event Action<int, int> OnObstacleDetectedEvent;
 
-        public IList<Vector2Int> GetSmoothedPath(ICellMap map, IList<Vector2Int> rawPath)
+        private IList<Vector2Int> ForwardSmoothing(ICellMap map, IList<Vector2Int> rawPath)
         {
             List<Vector2Int> smoothedPath = new List<Vector2Int>(rawPath.Count);
             bool lineCasterFailed = false;
             BresenhamLinePlotter lineCaster = new BresenhamLinePlotter();
             int currentIndex = 0, nextIndex = 1, lastValidIndex = 1;
+            Vector2Int lastObstacle = default;
             bool IsCellPassable(int x, int y)
             {
                 bool isPassable = map.IsPassable(x, y);
                 if (!isPassable)
                 {
                     OnObstacleDetectedEvent?.Invoke(x, y);
+                    lastObstacle = new Vector2Int(x, y);
                     lineCasterFailed = true;
                 }
 
@@ -37,33 +39,35 @@ namespace PathFinders.Algorithms
                 smoothedPath.Add(new Vector2Int(x, y));
                 return true;
             }
-           
+
 
             while (currentIndex < rawPath.Count - 1)
             {
-                lineCasterFailed = false;
-                nextIndex = currentIndex;
-                lastValidIndex = nextIndex;
-                while (nextIndex < rawPath.Count - 1)
+                
+                nextIndex = currentIndex + 1;
+                lastValidIndex = currentIndex;
+                while (nextIndex < rawPath.Count)
                 {
-                    nextIndex++;
-                    if (nextIndex >= rawPath.Count)
-                    {
-                        break;
-                    }
-                    //Debug.WriteLine($"Casting line from {rawPath[currentIndex]} to {rawPath[nextIndex]}");
+                    lineCasterFailed = false;
                     lineCaster.CastLine(rawPath[currentIndex], rawPath[nextIndex], IsCellPassable);
+                    
                     if (!lineCasterFailed)
                     {
                         lastValidIndex = nextIndex;
                     }
+                    nextIndex++;
                 }
-                //Debug.WriteLine($"Drawing line from {rawPath[currentIndex]} to {rawPath[nextIndex - 1]}");
+
                 lineCaster.CastLine(rawPath[currentIndex], rawPath[lastValidIndex], SetPathCell);
                 currentIndex = lastValidIndex + 1;
             }
-            Debug.WriteLine("Smoothing finished");
+
             return smoothedPath;
+        }
+
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, IList<Vector2Int> rawPath)
+        {
+            return ForwardSmoothing(map, rawPath);
         }
     }
 }

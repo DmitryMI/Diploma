@@ -109,6 +109,7 @@ namespace FillerTesting
 
             BresenhamLinePlotter plotter = new BresenhamLinePlotter();
             plotter.CastLine(new Vector2Int(x0, y0), new Vector2Int(x1, y1), PlotPoint);
+            Debug.WriteLine($"Drawing line from {x0}, {y0} to {x1}, {y1}");
         }
 
         private void OnClick(Point point)
