@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
 using PathFinders.Algorithms.HpaStar;
+using PathFinders.Graphs;
 using PathFinders.Graphs.Hierarchical;
 using PathFinders.Graphs.Hierarchical.SimpleTypes;
 
@@ -21,6 +22,7 @@ namespace MapAroundPathFinding
         private Graphics _graphics;
         private Brush _mapBrush = new SolidBrush(Color.Black);
         private int _scale;
+
 
         private void CreateMap()
         {
@@ -69,7 +71,6 @@ namespace MapAroundPathFinding
         private void StartButton_Click(object sender, EventArgs e)
         {
             DrawMap();
-
             LaunchHpaStar();
         }
 
@@ -118,6 +119,13 @@ namespace MapAroundPathFinding
                     int connectionXScaled = connection.Position.X * _scale + _scale / 2;
                     int connectionYScaled = connection.Position.Y * _scale + _scale / 2;
                     _graphics.DrawLine(new Pen(Color.Green, 3), startX, startY, connectionXScaled, connectionYScaled);
+
+                    int middleX = (connectionXScaled + startX) / 2;
+                    int middleY = (connectionYScaled + startY) / 2;
+                    double weight = node.GetWeight((IWeightedGraphNode<double>) connection);
+                    Font drawFont = new Font("Arial", 5);
+
+                    _graphics.DrawString(weight.ToString("0.0"), drawFont, new SolidBrush(Color.Black), middleX, middleY);
                 }
             }
         }
@@ -131,24 +139,43 @@ namespace MapAroundPathFinding
             _graphics.DrawRectangle(new Pen(Color.Red, 2), x, y, width, height);
         }
 
+        private void DrawClusters(CellCluster[,] clusterMatrix)
+        {
+            for (int x = 0; x < clusterMatrix.GetLength(0); x++)
+            {
+                for (int y = 0; y < clusterMatrix.GetLength(1); y++)
+                {
+                    DrawClusterBorders(clusterMatrix[x, y]);
+                }
+            }
+        }
+
+        private void DrawCellBorders()
+        {
+            for (int x = 0; x < _cellMap.Width; x++)
+            {
+                for (int y = 0; y < _cellMap.Height; y++)
+                {
+                    int xScaled = x * _scale;
+                    int yScaled = y * _scale;
+                    _graphics.DrawRectangle(new Pen(Color.Gray, 1), xScaled, yScaled, _scale, _scale);
+                }
+            }
+        }
+
         private void LaunchHpaStar()
         {
             int clusterSize = 8;
             var hierarchyGraph = HierarchicalMapGenerator.GenerateMap(_cellMap, NeighbourMode.SideOnly, clusterSize);
 
+            DrawCellBorders();
+
+            DrawClusters(hierarchyGraph.ZeroLevelClusters);
+            
             DrawLevelOneNodes(hierarchyGraph.Nodes);
 
-            //DrawLevelOneConnections(hierarchyGraph.Nodes);
-
-            CellCluster[,] clusters = HierarchicalMapGenerator.GeneratedClusters;
-
-            for (int x = 0; x < clusters.GetLength(0); x++)
-            {
-                for (int y = 0; y < clusters.GetLength(1); y++)
-                {
-                    //DrawClusterBorders(clusters[x, y]);
-                }
-            }
+            DrawLevelOneConnections(hierarchyGraph.Nodes);
+            
 
             HpaStarAlgorithm hpa = new HpaStarAlgorithm();
             hpa.HierarchicalGraph = hierarchyGraph;
