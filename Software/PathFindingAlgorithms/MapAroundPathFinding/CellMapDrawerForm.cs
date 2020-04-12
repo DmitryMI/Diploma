@@ -191,11 +191,11 @@ namespace MapAroundPathFinding
             SetUiEnabled(false);
         }
 
-        private void DrawPathPoint(Vector2Int pathPoint, Color color)
+        private void DrawPathPoint(Vector2Int pathPoint, Color color, int minPointSize)
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new Action<Vector2Int, Color>(DrawPathPoint), pathPoint, color);
+                BeginInvoke(new Action<Vector2Int, Color, int>(DrawPathPoint), pathPoint, color, minPointSize);
             }
             else
             {
@@ -203,17 +203,15 @@ namespace MapAroundPathFinding
                 int y = pathPoint.Y * _scale - _scale + 1;
                 int pointWidth = _scale;
                 int pointHeight = _scale;
-                /*int pointWidth = _scale;
-                int pointHeight = _scale;
-                if (pointWidth < 5)
+                if (pointWidth < minPointSize)
                 {
-                    pointWidth = 5;
+                    pointWidth = minPointSize;
                 }
 
-                if (pointHeight < 5)
+                if (pointHeight < minPointSize)
                 {
-                    pointHeight = 5;
-                }*/
+                    pointHeight = minPointSize;
+                }
                 Brush brush = new SolidBrush(color);
                 _pictureBoxGraphics.FillEllipse(brush, x, y, pointWidth, pointHeight);
             }
@@ -227,8 +225,7 @@ namespace MapAroundPathFinding
             }
             else
             {
-                Debug.WriteLine($"Obstacle detected on {x}, {y}");
-                _pictureBoxGraphics.DrawEllipse(new Pen(Color.LawnGreen), x * _scale, y * _scale, 3, 3);
+                _pictureBoxGraphics.DrawEllipse(new Pen(Color.LawnGreen), x * _scale - _scale + 1, y * _scale - _scale + 1, 3, 3);
             }
         }
 
@@ -237,7 +234,7 @@ namespace MapAroundPathFinding
             // Raw path drawing
             foreach (var cell in path)
             {
-                DrawPathPoint(cell, Color.Blue);
+                DrawPathPoint(cell, Color.Blue, 1);
             }
 
             PathSmoother smoother = new PathSmoother();
@@ -245,7 +242,7 @@ namespace MapAroundPathFinding
             IList<Vector2Int> smoothedPath = smoother.GetSmoothedPath(_cellMap, path);
             foreach (var cell in smoothedPath)
             {
-                DrawPathPoint(cell, Color.DarkCyan);
+                DrawPathPoint(cell, Color.DarkCyan, 3);
             }
         }
 

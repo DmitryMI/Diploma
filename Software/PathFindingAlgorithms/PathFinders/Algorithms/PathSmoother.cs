@@ -19,7 +19,7 @@ namespace PathFinders.Algorithms
             List<Vector2Int> smoothedPath = new List<Vector2Int>(rawPath.Count);
             bool lineCasterFailed = false;
             BresenhamLinePlotter lineCaster = new BresenhamLinePlotter();
-            int currentIndex = 0, nextIndex = 1;
+            int currentIndex = 0, nextIndex = 1, lastValidIndex = 1;
             bool IsCellPassable(int x, int y)
             {
                 bool isPassable = map.IsPassable(x, y);
@@ -43,21 +43,26 @@ namespace PathFinders.Algorithms
             {
                 lineCasterFailed = false;
                 nextIndex = currentIndex;
-                while (!lineCasterFailed)
+                lastValidIndex = nextIndex;
+                while (nextIndex < rawPath.Count - 1)
                 {
                     nextIndex++;
                     if (nextIndex >= rawPath.Count)
                     {
                         break;
                     }
-                    Debug.WriteLine($"Casting line from {rawPath[currentIndex]} to {rawPath[nextIndex]}");
+                    //Debug.WriteLine($"Casting line from {rawPath[currentIndex]} to {rawPath[nextIndex]}");
                     lineCaster.CastLine(rawPath[currentIndex], rawPath[nextIndex], IsCellPassable);
+                    if (!lineCasterFailed)
+                    {
+                        lastValidIndex = nextIndex;
+                    }
                 }
-                Debug.WriteLine($"Drawing line from {rawPath[currentIndex]} to {rawPath[nextIndex - 1]}");
-                lineCaster.CastLine(rawPath[currentIndex], rawPath[nextIndex - 1], SetPathCell);
-                currentIndex = nextIndex - 1;
+                //Debug.WriteLine($"Drawing line from {rawPath[currentIndex]} to {rawPath[nextIndex - 1]}");
+                lineCaster.CastLine(rawPath[currentIndex], rawPath[lastValidIndex], SetPathCell);
+                currentIndex = lastValidIndex + 1;
             }
-
+            Debug.WriteLine("Smoothing finished");
             return smoothedPath;
         }
     }
