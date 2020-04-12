@@ -45,6 +45,8 @@
     <Compile Include="Algorithms\BestFirstSearch.cs" />
     <Compile Include="Algorithms\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithms\HpaStar\HpaStarAlgorithm.cs" />
+    <Compile Include="Algorithms\PathSmoother.cs" />
+    <Compile Include="Algorithms\PathSmoothing\BrezenghemLine.cs" />
     <Compile Include="Algorithms\Utils.cs" />
     <Compile Include="Graphs\Hierarchical\HierarchicalMapGenerator.cs" />
     <Compile Include="Graphs\Hierarchical\ICellCluster.cs" />

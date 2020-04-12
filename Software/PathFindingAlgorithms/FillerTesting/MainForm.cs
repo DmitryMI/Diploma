@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using MapAroundPathFinding.PathFinding.PolygonFillerUtil;
 using PathFinders;
+using PathFinders.Algorithms.PathSmoothing;
 
 namespace FillerTesting
 {
@@ -68,7 +69,8 @@ namespace FillerTesting
             Point first = _points[0];
             Point last = _points.Last();
 
-            _graphics.DrawLine(_pen, first, last);
+            //_graphics.DrawLine(_pen, first, last);
+            DrawLine(_pen.Color, first.X, first.Y, last.X, last.Y);
             _isFinalized = true;
 
             PolygonFiller filler = new PolygonFiller(OnPointFilled);
@@ -93,6 +95,20 @@ namespace FillerTesting
                     return;
                 _bitmap.SetPixel(x, y, Color.Blue);
             }
+        }
+
+        private void DrawLine(Color color, int x0, int y0, int x1, int y1)
+        {
+            _graphics.DrawLine(new Pen(color), x0, y0,x1, y1);
+            bool PlotPoint(int x, int y)
+            {
+                Debug.WriteLine($"Point: {x}, {y}");
+                _graphics.FillRectangle(new SolidBrush(Color.Green), x, y, 2,2);
+                return true;
+            }
+
+            BresenhamLinePlotter plotter = new BresenhamLinePlotter();
+            plotter.CastLine(new Vector2Int(x0, y0), new Vector2Int(x1, y1), PlotPoint);
         }
 
         private void OnClick(Point point)
@@ -122,7 +138,8 @@ namespace FillerTesting
 
                 int prevX = _points.Last().X;
                 int prevY = _points.Last().Y;
-                _graphics.DrawLine(_pen, prevX, prevY, point.X, point.Y);
+                //_graphics.DrawLine(_pen, prevX, prevY, point.X, point.Y);
+                DrawLine(_pen.Color, prevX, prevY, point.X, point.Y);
                 _points.Add(point);
             }
         }

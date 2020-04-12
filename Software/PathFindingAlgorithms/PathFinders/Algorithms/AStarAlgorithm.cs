@@ -10,9 +10,6 @@ namespace PathFinders.Algorithms
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
 
-        private GraphData[,] _nodeData;
-        
-
         private struct GraphData
         {
             public double HValue { get; set; }
