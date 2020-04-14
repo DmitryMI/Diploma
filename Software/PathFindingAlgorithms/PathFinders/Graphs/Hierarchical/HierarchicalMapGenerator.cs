@@ -227,6 +227,7 @@ namespace PathFinders.Graphs.Hierarchical
                     
                     int prevI = i - 1;
                     int prevJ = j - 1;
+                    int nextJ = j + 1;
                     if (prevI >= 0)
                     {
                         CellCluster neighbourCluster = clusterMatrix[prevI, j];
@@ -240,6 +241,11 @@ namespace PathFinders.Graphs.Hierarchical
                     if (prevJ >= 0 && prevI >= 0 && neighbourMode == NeighbourMode.SidesAndDiagonals)
                     {
                         CellCluster neighbourCluster = clusterMatrix[prevI, prevJ];
+                        ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneMap);
+                    }
+                    if (nextJ < cellMap.Height && prevI >= 0 && neighbourMode == NeighbourMode.SidesAndDiagonals)
+                    {
+                        CellCluster neighbourCluster = clusterMatrix[prevI, nextJ];
                         ProceedNeighbourClusters(currentCluster, neighbourCluster, levelOneMap);
                     }
                 }
