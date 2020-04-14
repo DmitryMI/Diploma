@@ -46,13 +46,8 @@ namespace PathFinders.Graphs
 
                         int prevX = x - 1;
                         int prevY = y - 1;
-                        int nextX = x + 1;
-
-                        if (nextX < map.Width && prevY >= 0 && neighbourMode == NeighbourMode.SidesAndDiagonals)
-                        {
-                            connectionNode = nodes[nextX, prevY];
-                            ConnectNodes(currentNode, connectionNode);
-                        }
+                        int nextY = y + 1;
+                        
                         if (prevX >= 0)
                         {
                             connectionNode = nodes[prevX, y];
@@ -68,6 +63,12 @@ namespace PathFinders.Graphs
                         if (prevX >= 0 && prevY >= 0 && neighbourMode == NeighbourMode.SidesAndDiagonals)
                         {
                             connectionNode = nodes[prevX, prevY];
+                            ConnectNodes(currentNode, connectionNode);
+                        }
+
+                        if (nextY < map.Height && prevX >= 0 && neighbourMode == NeighbourMode.SidesAndDiagonals)
+                        {
+                            connectionNode = nodes[prevX, nextY];
                             ConnectNodes(currentNode, connectionNode);
                         }
                     }
