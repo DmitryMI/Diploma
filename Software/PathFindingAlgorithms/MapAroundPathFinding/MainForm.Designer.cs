@@ -28,37 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
             this.OpenMapButton = new System.Windows.Forms.Button();
             this.MainStatusStrip = new System.Windows.Forms.StatusStrip();
             this.ErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.LayerSettings = new System.Windows.Forms.Button();
             this.GetCellMapButton = new System.Windows.Forms.Button();
             this.HpaTestingButton = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
+            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
             this.MainStatusStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.SuspendLayout();
-            // 
-            // MapAroundControl
-            // 
-            this.MapAroundControl.AlignmentWhileZooming = true;
-            this.MapAroundControl.Animation = false;
-            this.MapAroundControl.AnimationTime = 400;
-            this.MapAroundControl.BackColor = System.Drawing.Color.White;
-            this.MapAroundControl.DragMode = MapAround.UI.WinForms.MapControl.DraggingMode.Pan;
-            this.MapAroundControl.DragThreshold = 1;
-            this.MapAroundControl.Editor = null;
-            this.MapAroundControl.IsDragging = false;
-            this.MapAroundControl.Location = new System.Drawing.Point(12, 12);
-            this.MapAroundControl.Map = null;
-            this.MapAroundControl.MouseWheelZooming = true;
-            this.MapAroundControl.Name = "MapAroundControl";
-            this.MapAroundControl.SelectionMargin = 3;
-            this.MapAroundControl.SelectionRectangleColor = System.Drawing.SystemColors.Highlight;
-            this.MapAroundControl.Size = new System.Drawing.Size(999, 552);
-            this.MapAroundControl.TabIndex = 0;
-            this.MapAroundControl.Text = "mapControl1";
-            this.MapAroundControl.ZoomPercent = 60;
             // 
             // OpenMapButton
             // 
@@ -117,6 +96,29 @@
             this.HpaTestingButton.UseVisualStyleBackColor = true;
             this.HpaTestingButton.Click += new System.EventHandler(this.HpaTestingButton_Click);
             // 
+            // MapAroundControl
+            // 
+            this.MapAroundControl.AlignmentWhileZooming = true;
+            this.MapAroundControl.Animation = false;
+            this.MapAroundControl.AnimationTime = 400;
+            this.MapAroundControl.BackColor = System.Drawing.Color.White;
+            this.MapAroundControl.DragMode = MapAround.UI.WinForms.MapControl.DraggingMode.Pan;
+            this.MapAroundControl.DragThreshold = 1;
+            this.MapAroundControl.Editor = null;
+            this.MapAroundControl.IsDragging = false;
+            this.MapAroundControl.Location = new System.Drawing.Point(12, 12);
+            this.MapAroundControl.Map = null;
+            this.MapAroundControl.MouseWheelZooming = true;
+            this.MapAroundControl.Name = "MapAroundControl";
+            this.MapAroundControl.SelectionMargin = 3;
+            this.MapAroundControl.SelectionRectangleColor = System.Drawing.SystemColors.Highlight;
+            this.MapAroundControl.Size = new System.Drawing.Size(999, 552);
+            this.MapAroundControl.TabIndex = 0;
+            this.MapAroundControl.Text = "mapControl1";
+            this.MapAroundControl.ZoomPercent = 60;
+            this.MapAroundControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseDown);
+            this.MapAroundControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseUp);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -131,9 +133,9 @@
             this.Name = "MainForm";
             this.Text = "MainForm";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).EndInit();
             this.MainStatusStrip.ResumeLayout(false);
             this.MainStatusStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

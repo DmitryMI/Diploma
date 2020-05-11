@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,11 +15,184 @@ using MapAround.DataProviders;
 using MapAround.Geometry;
 using MapAround.Mapping;
 using MapAroundPathFinding.PathFinding;
+using PathFinders;
+using PathFinders.Algorithms.PathSmoothing;
 
 namespace MapAroundPathFinding
 {
     public partial class MainForm : Form
     {
+        #region RegionDrawing
+
+        private const int PolygonFinalizePixelDelta = 10;
+        private List<ICoordinate> _points = new List<ICoordinate>();
+        private bool _isFinalized;
+        private List<RasterLayer> _rasterLayers = new List<RasterLayer>();
+        private FeatureLayer _userRegionLayer;
+        private void MapAroundControl_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void MapAroundControl_MouseUp(object sender, MouseEventArgs e)
+        {
+            if(_mapAroundMap == null)
+                return;
+            MouseEventArgs me = (MouseEventArgs)e;
+            if (me.Button == MouseButtons.Right)
+            {
+                Point coordinates = me.Location;
+                OnClick(coordinates);
+            }
+        }
+        private void InitUserPolygonLayer()
+        {
+            _userRegionLayer = new FeatureLayer();
+            _userRegionLayer.Alias = "User region layer";
+            _userRegionLayer.PolygonStyle.FillForeColor = Color.FromArgb(100, 255, 0, 0);
+            _userRegionLayer.PolygonStyle.BorderColor = Color.Red;
+            _userRegionLayer.Visible = true;
+
+            _mapAroundMap.AddLayer(_userRegionLayer);
+        }
+
+        private void ClearRasterLayers()
+        {
+            foreach (var layer in _rasterLayers)
+            {
+                _mapAroundMap.RemoveLayer(layer);
+            }
+
+            _rasterLayers.Clear();
+        }
+
+        private void FinalizePolygon()
+        {
+            Debug.WriteLine("Finishing polygon...");
+
+            ICoordinate firstCoordinate = _points[0];
+            ICoordinate lastCoordinate = _points.Last();
+
+            Point first = MapAroundControl.MapToClient(firstCoordinate);
+            Point last = MapAroundControl.MapToClient(lastCoordinate);
+
+
+            var rectangle = MapAroundControl.GetViewBox();
+
+            DrawLine(rectangle, Color.Green, first, last);
+
+            _isFinalized = true;
+
+            Polygon polygon = new Polygon(_points);
+            Feature polygonFeature = new Feature(FeatureType.Polygon) {Polygon = polygon};
+            _userRegionLayer.AddPolygon(polygonFeature);
+            _points.Clear();
+            ClearRasterLayers();
+            MapAroundControl.RedrawMap();
+        }
+
+
+        private void OnClick(Point point)
+        {
+            ICoordinate coordinate = MapAroundControl.ClientToMap(point);
+            if (_isFinalized)
+            {
+                Debug.WriteLine("Clearing picture box");
+
+                ClearRasterLayers();
+
+                _points.Clear();
+                _isFinalized = false;
+            }
+
+            if (_points.Count == 0)
+            {
+                _points.Add(coordinate);
+            }
+            else
+            {
+                Point firstPoint = MapAroundControl.MapToClient(_points[0]);
+                int firstDx = Math.Abs(firstPoint.X - point.X);
+                int firstDy = Math.Abs(firstPoint.Y - point.Y);
+
+                if (firstDx < PolygonFinalizePixelDelta && firstDy < PolygonFinalizePixelDelta)
+                {
+                    FinalizePolygon();
+                    return;
+                }
+
+                Point prevPoint = MapAroundControl.MapToClient(_points.Last());
+
+                var rectangle = MapAroundControl.GetViewBox();
+                DrawLine(rectangle, Color.Red, point, prevPoint);
+                _points.Add(coordinate);
+            }
+        }
+
+        private void DrawLine(BoundingRectangle rectangle, Color color, Point p0, Point p1)
+        {
+            int x0 = p0.X;
+            int y0 = p0.Y;
+            int x1 = p1.X;
+            int y1 = p1.Y;
+
+            var rectMinPixel = MapAroundControl.MapToClient(rectangle.Min);
+            var rectMaxPixel = MapAroundControl.MapToClient(rectangle.Max);
+            int bitmapWidth = Math.Abs(rectMinPixel.X - rectMaxPixel.X);
+            int bitmapHeight = Math.Abs(rectMinPixel.Y - rectMaxPixel.Y);
+
+            int minX = Math.Min(p0.X, p1.X);
+            int minY = Math.Min(p0.Y, p1.Y);
+            int maxX = Math.Max(p0.X, p1.X);
+            int maxY = Math.Max(p0.Y, p1.Y);
+
+            if (bitmapWidth == 0)
+                bitmapWidth = 1;
+            if (bitmapHeight == 0)
+                bitmapHeight = 1;
+
+            Bitmap bitmap = new Bitmap(bitmapWidth, bitmapHeight);
+            RasterLayer layer;
+            layer = new RasterLayer();
+            _rasterLayers.Add(layer);
+            _mapAroundMap.AddLayer(layer);
+
+            layer.AddRasterPreview(bitmap, rectangle, bitmap.Width, bitmap.Height);
+            layer.Visible = true;
+
+
+            //Rectangle lockRect = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+            Rectangle lockRect = new Rectangle(0, 0, bitmapWidth, bitmapHeight);
+            BitmapData bitmapData = bitmap.LockBits(lockRect, ImageLockMode.WriteOnly, bitmap.PixelFormat);
+
+            byte[] pixelBytes = { color.B, color.G, color.R, color.A };
+
+            bool PlotPoint(int x, int y)
+            {
+                int plotX = x;
+                int plotY = y;
+                if (plotX < 0 || plotY < 0 || plotX >= bitmap.Width || plotY >= bitmap.Height)
+                {
+                    return true;
+                }
+
+                int positionByte = (y * bitmap.Width + x) * pixelBytes.Length;
+                
+                Marshal.Copy(pixelBytes, 0, bitmapData.Scan0 + positionByte, pixelBytes.Length);
+                //bitmap.SetPixel(plotX, plotY, color);
+                return true;
+            }
+
+            BresenhamLinePlotter plotter = new BresenhamLinePlotter();
+            plotter.CastLine(new Vector2Int(x0, y0), new Vector2Int(x1, y1), PlotPoint);
+
+            bitmap.UnlockBits(bitmapData);
+
+            MapAroundControl.RedrawMap();
+        }
+
+        #endregion
+
         private Map _mapAroundMap;
 
         public MainForm()
@@ -151,8 +327,8 @@ namespace MapAroundPathFinding
                     throw;
                 }
             }
-            
             MapAroundControl.Map = _mapAroundMap;
+            InitUserPolygonLayer();
             SetViewBox();
         }
 
@@ -206,6 +382,7 @@ namespace MapAroundPathFinding
             double cellSize = 4E-5;
             MapAroundCellMap cellMap = new MapAroundCellMap(_mapAroundMap, rectangle, cellSize, cellSize);
             cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
+            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("User region layer"));
             CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
             drawerForm.Show();
         }
@@ -215,5 +392,7 @@ namespace MapAroundPathFinding
             HpaTestForm testForm = new HpaTestForm(null);
             testForm.Show();
         }
+
+        
     }
 }
