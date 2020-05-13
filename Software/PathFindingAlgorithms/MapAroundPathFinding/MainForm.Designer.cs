@@ -35,6 +35,7 @@
             this.GetCellMapButton = new System.Windows.Forms.Button();
             this.HpaTestingButton = new System.Windows.Forms.Button();
             this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
+            this.TestUserYButton = new System.Windows.Forms.Button();
             this.MainStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.SuspendLayout();
@@ -119,11 +120,22 @@
             this.MapAroundControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseDown);
             this.MapAroundControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseUp);
             // 
+            // TestUserYButton
+            // 
+            this.TestUserYButton.Location = new System.Drawing.Point(1017, 128);
+            this.TestUserYButton.Name = "TestUserYButton";
+            this.TestUserYButton.Size = new System.Drawing.Size(152, 23);
+            this.TestUserYButton.TabIndex = 7;
+            this.TestUserYButton.Text = "Y TEST";
+            this.TestUserYButton.UseVisualStyleBackColor = true;
+            this.TestUserYButton.Click += new System.EventHandler(this.TestUserYButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1181, 589);
+            this.Controls.Add(this.TestUserYButton);
             this.Controls.Add(this.HpaTestingButton);
             this.Controls.Add(this.GetCellMapButton);
             this.Controls.Add(this.LayerSettings);
@@ -150,5 +162,6 @@
         private System.Windows.Forms.Button LayerSettings;
         private System.Windows.Forms.Button GetCellMapButton;
         private System.Windows.Forms.Button HpaTestingButton;
+        private System.Windows.Forms.Button TestUserYButton;
     }
 }

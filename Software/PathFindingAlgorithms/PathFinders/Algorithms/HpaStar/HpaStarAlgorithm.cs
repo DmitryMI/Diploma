@@ -19,6 +19,13 @@ namespace PathFinders.Algorithms.HpaStar
         public int ClusterSizeZero { get; } = 16;
 
         private CellCluster _currentCellCluster;
+        private bool _isInitialized = false;
+        private ICellMap _mapBase;
+        private LayeredCellMap _layeredCellMap;
+
+        private List<ICellFragment> _userObstacles = new List<ICellFragment>();
+
+        public ICellMap LayeredCellMap => _layeredCellMap;
 
         private CellCluster GetContainingCluster(CellCluster[,] clusterMatrix, Vector2Int point)
         {
@@ -27,7 +34,7 @@ namespace PathFinders.Algorithms.HpaStar
             return clusterMatrix[i, j];
         }
 
-        public void PreBuildGraph(ICellMap map)
+        private void PreBuildGraph(ICellMap map)
         {
             Stopwatch sw = new Stopwatch();
             Debug.WriteLine("Hierarchical graph construction started");
@@ -37,11 +44,19 @@ namespace PathFinders.Algorithms.HpaStar
             Debug.WriteLine($"Hierarchical graph construction finished in {sw.Elapsed}");
         }
 
+        public void Initialize(ICellMap mapBase)
+        {
+            _mapBase = mapBase;
+            _layeredCellMap = new LayeredCellMap(_mapBase);
+            PreBuildGraph(_layeredCellMap);
+            _isInitialized = true;
+        }
+
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
-            if (HierarchicalGraph == null)
+            if (!_isInitialized)
             {
-                PreBuildGraph(map);
+                Initialize(map);
             }
 
             CellCluster startContainer = GetContainingCluster(HierarchicalGraph.ZeroLevelClusters, start);
@@ -128,12 +143,6 @@ namespace PathFinders.Algorithms.HpaStar
             }
         }
 
-        private void GeneratorCellViewed(object sender, int x, int y, int d)
-        {
-            //OnCellViewedEvent?.Invoke(this, x, y, d);
-        }
-
-
         private void OnAStarCellViewed(object sender, int x, int y, int d)
         {
             if (_currentCellCluster != null)
@@ -149,7 +158,22 @@ namespace PathFinders.Algorithms.HpaStar
 
         public void AddObstacle(ICellFragment cellCluster)
         {
-            
+            _userObstacles.Add(cellCluster);
+        }
+
+        public void ClearObstacles()
+        {
+            _userObstacles.Clear();
+        }
+
+        public void RecalculateHierarchicalGraph()
+        {
+            // TODO Use better way
+            foreach (var obstacle in _userObstacles)
+            {
+                _layeredCellMap.AddFragment(obstacle);
+            }
+            PreBuildGraph(_layeredCellMap);
         }
     }
 }

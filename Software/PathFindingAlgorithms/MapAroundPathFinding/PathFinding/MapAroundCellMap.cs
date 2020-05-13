@@ -137,48 +137,9 @@ namespace MapAroundPathFinding.PathFinding
             return ToBitmap(1);
         }
 
-        private void DrawScaledPixel(Bitmap bmp, Color color, int x, int y, int scale)
-        {
-            double scaleHalf = (double)scale / 2;
-            int xScaled = x * scale - (int)Math.Round(scaleHalf);
-            int yScaled = y * scale - (int)Math.Round(scaleHalf);
-
-            int borderMin = -(int) Math.Round(scaleHalf);
-            int borderMax = (int)Math.Round(scaleHalf);
-
-            for (int i = borderMin; i <= borderMax; i++)
-            {
-                int drawX = xScaled + i;
-                if (drawX < 0 || drawX >= bmp.Width)
-                {
-                    continue;
-                }
-                for (int j = -borderMax; j <= borderMax; j++)
-                {
-                    int drawY = yScaled + j;
-                    if (drawY < 0 || drawY >= bmp.Height)
-                        continue;
-                    bmp.SetPixel(drawX, drawY, color);
-                }
-            }
-        }
-
         public Bitmap ToBitmap(int pixelScale)
         {
-            Bitmap bitmap = new Bitmap(Width * pixelScale, Height * pixelScale);
-
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y= 0; y < Height; y++)
-                {
-                    if (!_mapCells[x, y])
-                    {
-                        DrawScaledPixel(bitmap, Color.Black, x, y, pixelScale);
-                    }
-                }
-            }
-
-            return bitmap;
+            return CellMapToBitmap.GetBitmap(this, pixelScale);
         }
 
         public int Width => _mapCells.GetLength(0);

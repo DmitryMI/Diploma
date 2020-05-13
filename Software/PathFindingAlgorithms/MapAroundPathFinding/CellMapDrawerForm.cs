@@ -27,7 +27,7 @@ namespace MapAroundPathFinding
         private int DefaultWidth = 1000;
         private int DefaultHeight = 550;
 
-        private MapAroundCellMap _cellMap;
+        private ICellMap _cellMap;
         private Graphics _pictureBoxGraphics;
         private SolidBrush _reportBrush = new SolidBrush(Color.Green);
         private SolidBrush _pathBrush = new SolidBrush(Color.Blue);
@@ -38,10 +38,22 @@ namespace MapAroundPathFinding
 
         private ICellPathFinder _currentPathFinder;
 
-        public CellMapDrawerForm(MapAroundCellMap cellMap)
+        private IList<Vector2Int> _userPath;
+
+        public CellMapDrawerForm(ICellMap cellMap)
         {
             InitializeComponent();
 
+            ShowMap(cellMap);
+        }
+
+        public CellMapDrawerForm()
+        {
+            InitializeComponent();
+        }
+
+        public void ShowMap(ICellMap cellMap)
+        {
             _cellMap = cellMap;
             _stage = 0;
 
@@ -50,6 +62,24 @@ namespace MapAroundPathFinding
             _pictureBoxGraphics = PictureBox.CreateGraphics();
 
             AddAlgorithms();
+
+            Show();
+        }
+
+        public void ShowMap(ICellMap cellMap, IList<Vector2Int> path)
+        {
+            _cellMap = cellMap;
+            _stage = 0;
+
+            DrawCellMatrix();
+
+            _pictureBoxGraphics = PictureBox.CreateGraphics();
+
+            AddAlgorithms();
+
+            _userPath = path;
+
+            Show();
         }
 
         private class PathFinderSelectorItem
@@ -130,7 +160,7 @@ namespace MapAroundPathFinding
             ResizeWindow(mapWidth * scale, mapHeight * scale);
 
 
-            Bitmap bitmap = _cellMap.ToBitmap(scale);
+            Bitmap bitmap = CellMapToBitmap.GetBitmap(_cellMap, scale);
             _scale = scale;
             RenderBitmap(bitmap);
         }
@@ -239,6 +269,10 @@ namespace MapAroundPathFinding
 
         private void DrawPath(IList<Vector2Int> path)
         {
+            if (path == null)
+            {
+                return;
+            }
             // Raw path drawing
             foreach (var cell in path)
             {
@@ -256,6 +290,14 @@ namespace MapAroundPathFinding
             }
 
             Debug.WriteLine($"Smoothed path length: {path.Count}");
+        }
+
+        public void DrawUserPath(IList<Vector2Int> path)
+        {
+            foreach (var cell in path)
+            {
+                DrawPathPoint(cell, Color.Blue, 1);
+            }
         }
 
         private void StartPathFinder()
@@ -396,12 +438,18 @@ namespace MapAroundPathFinding
 
         private void FindPathButton_Click(object sender, EventArgs e)
         {
+            DrawPath(_userPath);
             FindPath();
         }
 
         private void AlgorithmSelectorBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             _currentPathFinder = InstantiatePathFinder();
+        }
+
+        private void DrawUserPathButton_Click(object sender, EventArgs e)
+        {
+            DrawPath(_userPath);
         }
     }
 }

@@ -19,28 +19,40 @@ namespace MapAroundPathFinding.PathFinding
         private readonly double _cellWidth;
         private readonly double _cellHeight;
         private readonly BoundingRectangle _boundingRectangle;
+        private readonly BoundingRectangle _mapRectangle;
 
         private readonly bool[,] _mapCells;
 
-        public PolygonCellFragment(Feature polygonFeature, double cellWidth, double cellHeight)
+        public PolygonCellFragment(Feature polygonFeature, BoundingRectangle mapBoundingRectangle, double cellWidth, double cellHeight)
         {
             if (polygonFeature.FeatureType != FeatureType.Polygon)
             {
                 throw new ArgumentException("Feature must be Polygon-type");
             }
 
+            _mapRectangle = mapBoundingRectangle;
+
             _cellWidth = cellWidth;
             _cellHeight = cellHeight;
 
-            var mapBoundaries = polygonFeature.BoundingRectangle;
+            var featureBoundingRectangle = polygonFeature.BoundingRectangle;
 
-            int cellMapWidth = (int)Math.Round(mapBoundaries.Width / cellWidth);
-            int cellMapHeight = (int)Math.Round(mapBoundaries.Height / cellHeight);
+            int cellMapWidth = (int)Math.Round(featureBoundingRectangle.Width / cellWidth);
+            int cellMapHeight = (int)Math.Round(featureBoundingRectangle.Height / cellHeight);
             _width = cellMapWidth;
             _height = cellMapHeight;
             _mapCells = new bool[cellMapWidth, cellMapHeight];
 
-            _boundingRectangle = mapBoundaries;
+            _boundingRectangle = featureBoundingRectangle;
+
+            double xCoordinate = _boundingRectangle.MinX - mapBoundingRectangle.MinX;
+            double yCoordinate = _boundingRectangle.MinY - mapBoundingRectangle.MinY;
+
+            int minX = (int) Math.Round(xCoordinate / cellWidth);
+            int minY = (int) Math.Round(yCoordinate / cellHeight);
+
+            _leftBottom = new Vector2Int(minX, minY);
+            _leftBottomHasValue = true;
 
             for (int x = 0; x < cellMapWidth; x++)
             {
@@ -74,13 +86,16 @@ namespace MapAroundPathFinding.PathFinding
             Vector2Int firstPoint = default;
             for (int i = 0; i < contour.CoordinateCount; i++)
             {
-                double xShifted = contour.Vertices[i].X - _boundingRectangle.MinX;
-                double yShifted = contour.Vertices[i].Y - _boundingRectangle.MinY;
+                double xCoordinate = _boundingRectangle.MinX;
+                double yCoordinate = _boundingRectangle.MinY;
+
+                double xShifted = contour.Vertices[i].X - xCoordinate;
+                double yShifted = contour.Vertices[i].Y - yCoordinate;
                 int xInt = (int)Math.Round(xShifted / _cellWidth);
                 int yInt = (int)Math.Round(yShifted / _cellHeight);
 
                 Vector2Int point = new Vector2Int(xInt, yInt);
-                SetIfLesser(point);
+                //SetLeftBottomIfLesser(point);
 
                 if (i == 0)
                 {
@@ -100,9 +115,9 @@ namespace MapAroundPathFinding.PathFinding
             FillPolygon(edges);
         }
 
-        private void SetIfLesser(Vector2Int cell)
+        private void SetLeftBottomIfLesser(Vector2Int cell)
         {
-            if (_leftBottomHasValue)
+            if (!_leftBottomHasValue)
             {
                 _leftBottom = cell;
                 _leftBottomHasValue = true;

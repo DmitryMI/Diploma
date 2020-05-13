@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using MapAround.DataProviders;
@@ -16,6 +17,7 @@ using MapAround.Geometry;
 using MapAround.Mapping;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
+using PathFinders.Algorithms;
 using PathFinders.Algorithms.HpaStar;
 using PathFinders.Algorithms.PathSmoothing;
 using Coordinate = MapAround.Geometry.Coordinate;
@@ -25,6 +27,7 @@ namespace MapAroundPathFinding
     public partial class MainForm : Form
     {
         private Map _mapAroundMap;
+        private BoundingRectangle _initialRectangle;
 
         public MainForm()
         {
@@ -189,6 +192,7 @@ namespace MapAroundPathFinding
 
         #region PathFinding
         private const double DefaultCellSize =  4E-5;
+        //private const double DefaultCellSize =  2E-5;
         private ICoordinate _startPoint;
         private ICoordinate _endPoint;
         private MapAroundCellMap _cellMap;
@@ -212,7 +216,7 @@ namespace MapAroundPathFinding
 
         private void InitCellMap()
         {
-            _cellMap = new MapAroundCellMap(_mapAroundMap, MapAroundControl.GetViewBox(), DefaultCellSize, DefaultCellSize);
+            _cellMap = new MapAroundCellMap(_mapAroundMap, _initialRectangle, DefaultCellSize, DefaultCellSize);
             _cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
         }
 
@@ -228,7 +232,7 @@ namespace MapAroundPathFinding
 
         private void PreBuildGraphJob()
         {
-            _hpaStar.PreBuildGraph(_cellMap);
+            _hpaStar.Initialize(_cellMap);
             SetUiActive(true);
         }
 
@@ -276,22 +280,53 @@ namespace MapAroundPathFinding
         {
             Debug.WriteLine("Path finding started...");
             ClearPathLayer();
-            foreach (var feature in _userRegionLayer.Features)
-            {
-                if (feature.FeatureType == FeatureType.Polygon)
-                {
-                    PolygonCellFragment cellFragment = new PolygonCellFragment(feature, DefaultCellSize, DefaultCellSize);
-                    _hpaStar.AddObstacle(cellFragment);
-                }
-            }
+            
 
             SetUiActive(false);
             _backgroundTask = new Task(GetPathJob, TaskCreationOptions.LongRunning);
             _backgroundTask.Start();
         }
 
+        private void ShowCellMapDrawerForm(CellMapDrawerForm form, ICellMap map, IList<Vector2Int> path)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<CellMapDrawerForm, ICellMap, IList<Vector2Int>>(ShowCellMapDrawerForm), form, map, path);
+                return;
+            }
+            Debug.WriteLine($"CellMapDrawerForm showed on thread {Thread.CurrentThread.ManagedThreadId}");
+            form.ShowMap(map, path);
+        }
+
+        private T CreateForm<T>() where T: Form
+        {
+            if (InvokeRequired)
+            {
+                var asyncResult = BeginInvoke(new Func<T>(CreateForm<T>));
+                T result = (T)EndInvoke(asyncResult);
+                return result;
+            }
+
+            T form = Activator.CreateInstance<T>();
+            Debug.WriteLine($"CellMapDrawerForm instantiated on thread {Thread.CurrentThread.ManagedThreadId}");
+            return form;
+        }
+
         private void GetPathJob()
         {
+            _hpaStar.ClearObstacles();
+            foreach (var feature in _userRegionLayer.Features)
+            {
+                if (feature.FeatureType == FeatureType.Polygon)
+                {
+                    PolygonCellFragment cellFragment =
+                        new PolygonCellFragment(feature, _initialRectangle, DefaultCellSize, DefaultCellSize);
+                    _hpaStar.AddObstacle(cellFragment);
+                }
+            }
+
+            _hpaStar.RecalculateHierarchicalGraph();
+
             Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
             Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
 
@@ -302,7 +337,7 @@ namespace MapAroundPathFinding
                 MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
-            { 
+            {
                 DrawPath(path);
             }
 
@@ -312,8 +347,10 @@ namespace MapAroundPathFinding
             SetUiActive(true);
         }
 
-        private void DrawPath(IList<Vector2Int> path)
+        private void DrawPath(IList<Vector2Int> rawPath)
         {
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(_hpaStar.LayeredCellMap, rawPath);
             foreach (var cell in path)
             {
                 ICoordinate coordinate = ProjectFromCellMap(cell);
@@ -324,6 +361,9 @@ namespace MapAroundPathFinding
             }
             Debug.WriteLine("Path finding finished!");
             RedrawMap();
+
+            CellMapDrawerForm drawerForm = CreateForm<CellMapDrawerForm>();
+            ShowCellMapDrawerForm(drawerForm, _hpaStar.LayeredCellMap, rawPath);
         }
 
         private void RedrawMap()
@@ -431,7 +471,7 @@ namespace MapAroundPathFinding
             double cellSize = 4E-5;
             MapAroundCellMap cellMap = new MapAroundCellMap(_mapAroundMap, rectangle, cellSize, cellSize);
             cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
-            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("User region layer"));
+            //cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("User region layer"));
             CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
             drawerForm.Show();
         }
@@ -461,6 +501,7 @@ namespace MapAroundPathFinding
         private void SetViewBox() // Метод поиска ViewBox
         {
             BoundingRectangle rectangle = _mapAroundMap.CalculateBoundingRectangle();
+            _initialRectangle = rectangle;
             if (rectangle.IsEmpty()) return; // Расчет  области данных карты
 
             // Поправка, для того, что бы вписать данные в контрол
@@ -590,5 +631,24 @@ namespace MapAroundPathFinding
         }
 
         #endregion
+
+        private void TestUserYButton_Click(object sender, EventArgs e)
+        {
+            Feature polygonFeature = new Feature(FeatureType.Polygon);
+
+            ICoordinate coordinate0 = _initialRectangle.Min;
+
+            ICoordinate coordinate1 = ((ICoordinate) coordinate0.Clone());
+            coordinate1.Translate(0, DefaultCellSize * 20);
+
+            ICoordinate coordinate2 = ((ICoordinate) coordinate0.Clone());
+            coordinate2.Translate(DefaultCellSize * 10, DefaultCellSize * 10);
+
+            Polygon polygon = new Polygon(new []{coordinate0, coordinate1, coordinate2});
+            polygonFeature.Polygon = polygon;
+
+            _userRegionLayer.AddFeature(polygonFeature);
+            RedrawMap();
+        }
     }
 }
