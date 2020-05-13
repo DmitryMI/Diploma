@@ -29,6 +29,11 @@ namespace MapAroundPathFinding.PathFinding
         {
             _mapAroundMap = mapAroundMap;
             _obstacles = new List<Polygon>();
+            SetBoundaries(mapBoundaries, cellWidth, cellHeight);
+        }
+
+        public void SetBoundaries(BoundingRectangle mapBoundaries, double cellWidth, double cellHeight)
+        {
             _boundingRectangle = mapBoundaries;
 
             _cellWidth = cellWidth;
@@ -68,10 +73,10 @@ namespace MapAroundPathFinding.PathFinding
             Vector2Int firstPoint = default;
             for (int i = 0; i < contour.CoordinateCount; i++)
             {
-                double xShifted = contour.Vertices[i].X - _boundingRectangle.MinX;
-                double yShifted = contour.Vertices[i].Y - _boundingRectangle.MinY;
-                int xInt = (int) Math.Round(xShifted / _cellWidth);
-                int yInt = (int) Math.Round(yShifted / _cellHeight);
+                double xShifted = contour.Vertices[i].X - BoundingRectangle.MinX;
+                double yShifted = contour.Vertices[i].Y - BoundingRectangle.MinY;
+                int xInt = (int) Math.Round(xShifted / CellWidth);
+                int yInt = (int) Math.Round(yShifted / CellHeight);
 
                 Vector2Int point = new Vector2Int(xInt, yInt);
 
@@ -108,7 +113,7 @@ namespace MapAroundPathFinding.PathFinding
             foreach (var polygonFeature in layer.Polygons)
             {
                 var bounds = polygonFeature.BoundingRectangle;
-                if (_boundingRectangle.ContainsRectangle(bounds))
+                if (BoundingRectangle.ContainsRectangle(bounds))
                 {
                     _obstacles.Add(polygonFeature.Polygon);
                     RegisterObstacle(polygonFeature.Polygon);
@@ -178,5 +183,11 @@ namespace MapAroundPathFinding.PathFinding
 
         public int Width => _mapCells.GetLength(0);
         public int Height => _mapCells.GetLength(1);
+
+        public double CellWidth => _cellWidth;
+
+        public double CellHeight => _cellHeight;
+
+        public BoundingRectangle BoundingRectangle => _boundingRectangle;
     }
 }

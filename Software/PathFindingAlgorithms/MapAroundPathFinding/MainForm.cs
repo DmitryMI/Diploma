@@ -16,12 +16,21 @@ using MapAround.Geometry;
 using MapAround.Mapping;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
+using PathFinders.Algorithms.HpaStar;
 using PathFinders.Algorithms.PathSmoothing;
+using Coordinate = MapAround.Geometry.Coordinate;
 
 namespace MapAroundPathFinding
 {
     public partial class MainForm : Form
     {
+        private Map _mapAroundMap;
+
+        public MainForm()
+        {
+            InitializeComponent();
+        }
+
         #region RegionDrawing
 
         private const int PolygonFinalizePixelDelta = 10;
@@ -29,22 +38,7 @@ namespace MapAroundPathFinding
         private bool _isFinalized;
         private List<RasterLayer> _rasterLayers = new List<RasterLayer>();
         private FeatureLayer _userRegionLayer;
-        private void MapAroundControl_MouseDown(object sender, MouseEventArgs e)
-        {
-
-        }
-
-        private void MapAroundControl_MouseUp(object sender, MouseEventArgs e)
-        {
-            if(_mapAroundMap == null)
-                return;
-            MouseEventArgs me = (MouseEventArgs)e;
-            if (me.Button == MouseButtons.Right)
-            {
-                Point coordinates = me.Location;
-                OnClick(coordinates);
-            }
-        }
+       
         private void InitUserPolygonLayer()
         {
             _userRegionLayer = new FeatureLayer();
@@ -92,7 +86,7 @@ namespace MapAroundPathFinding
         }
 
 
-        private void OnClick(Point point)
+        private void OnRightClick(Point point)
         {
             ICoordinate coordinate = MapAroundControl.ClientToMap(point);
             if (_isFinalized)
@@ -193,12 +187,264 @@ namespace MapAroundPathFinding
 
         #endregion
 
-        private Map _mapAroundMap;
+        #region PathFinding
+        private const double DefaultCellSize =  4E-5;
+        private ICoordinate _startPoint;
+        private ICoordinate _endPoint;
+        private MapAroundCellMap _cellMap;
+        private HpaStarAlgorithm _hpaStar;
+        private Task _backgroundTask;
+        private FeatureLayer _pathFeatureLayer;
+        private bool _pathFindingUiActive = true;
 
-        public MainForm()
+        private void SetUiActive(bool active)
         {
-            InitializeComponent();
+            _pathFindingUiActive = active;
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<bool>(SetUiActive), active);
+                return;
+            }
+
+            OpenMapButton.Enabled = active;
+            LayerSettings.Enabled = active;
         }
+
+        private void InitCellMap()
+        {
+            _cellMap = new MapAroundCellMap(_mapAroundMap, MapAroundControl.GetViewBox(), DefaultCellSize, DefaultCellSize);
+            _cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
+        }
+
+        private void InitHpaStar()
+        {
+            _hpaStar = new HpaStarAlgorithm();
+
+            SetUiActive(false);
+            
+            _backgroundTask = new Task(PreBuildGraphJob, TaskCreationOptions.LongRunning);
+            _backgroundTask.Start();
+        }
+
+        private void PreBuildGraphJob()
+        {
+            _hpaStar.PreBuildGraph(_cellMap);
+            SetUiActive(true);
+        }
+
+        private void InitPathLayer()
+        {
+            _pathFeatureLayer = new FeatureLayer();
+            _pathFeatureLayer.PointStyle.Color = Color.Green;
+            _pathFeatureLayer.PointStyle.Size = 10;
+            _pathFeatureLayer.PointStyle.Symbol = '*';
+            _pathFeatureLayer.Visible = true;
+            _mapAroundMap.AddLayer(_pathFeatureLayer);
+        }
+
+        private void ClearPathLayer()
+        {
+            _pathFeatureLayer.RemoveAllFeatures();
+        }
+
+        private Vector2Int ProjectToCellMap(ICoordinate coordinate)
+        {
+            double boundXMin = _cellMap.BoundingRectangle.MinX;
+            double boundYMin = _cellMap.BoundingRectangle.MinY;
+            double xCell = coordinate.X / _cellMap.CellWidth;
+            double yCell = coordinate.Y / _cellMap.CellHeight;
+            xCell -= boundXMin / _cellMap.CellWidth;
+            yCell -= boundYMin / _cellMap.CellHeight;
+
+            int x = (int)Math.Round(xCell);
+            int y = (int)Math.Round(yCell);
+            return new Vector2Int(x, y);
+        }
+
+        private Coordinate ProjectFromCellMap(Vector2Int cell)
+        {
+            double boundXMin = _cellMap.BoundingRectangle.MinX;
+            double boundYMin = _cellMap.BoundingRectangle.MinY;
+            double x = cell.X * _cellMap.CellWidth;
+            double y = cell.Y * _cellMap.CellHeight;
+            x += boundXMin;
+            y += boundYMin;
+            return new Coordinate() {X = x, Y = y};
+        }
+
+        private void StartPathFinding()
+        {
+            Debug.WriteLine("Path finding started...");
+            ClearPathLayer();
+            foreach (var feature in _userRegionLayer.Features)
+            {
+                if (feature.FeatureType == FeatureType.Polygon)
+                {
+                    PolygonCellFragment cellFragment = new PolygonCellFragment(feature, DefaultCellSize, DefaultCellSize);
+                    _hpaStar.AddObstacle(cellFragment);
+                }
+            }
+
+            SetUiActive(false);
+            _backgroundTask = new Task(GetPathJob, TaskCreationOptions.LongRunning);
+            _backgroundTask.Start();
+        }
+
+        private void GetPathJob()
+        {
+            Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
+            Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
+
+            var path = _hpaStar.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+
+            if (path == null)
+            {
+                MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else
+            { 
+                DrawPath(path);
+            }
+
+            _startPoint = null;
+            _endPoint = null;
+
+            SetUiActive(true);
+        }
+
+        private void DrawPath(IList<Vector2Int> path)
+        {
+            foreach (var cell in path)
+            {
+                ICoordinate coordinate = ProjectFromCellMap(cell);
+                Feature pointFeature = new Feature(FeatureType.Point);
+                PointD point = new PointD(coordinate);
+                pointFeature.Point = point;
+                _pathFeatureLayer.AddFeature(pointFeature);
+            }
+            Debug.WriteLine("Path finding finished!");
+            RedrawMap();
+        }
+
+        private void RedrawMap()
+        {
+            if (MapAroundControl.InvokeRequired)
+            {
+                MapAroundControl.BeginInvoke(new Action(RedrawMap));
+            }
+            else
+            {
+                MapAroundControl.RedrawMap();
+            }
+        }
+
+        private void OnMiddleClick(Point point)
+        {
+            if (_pathFindingUiActive == false)
+            {
+                return;
+            }
+            if (_backgroundTask == null || _backgroundTask.Status != TaskStatus.Running)
+            {
+                if (_startPoint == null)
+                {
+                    _startPoint = MapAroundControl.ClientToMap(point);
+                }
+                else
+                {
+                    _endPoint = MapAroundControl.ClientToMap(point);
+                    StartPathFinding();
+                }
+            }
+        }
+        #endregion
+
+        #region EventHandlers
+        private void MapAroundControl_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void MapAroundControl_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (_mapAroundMap == null)
+                return;
+            MouseEventArgs me = (MouseEventArgs)e;
+            Point mousePoint = me.Location;
+            switch (me.Button)
+            {
+                case MouseButtons.Right:
+                {
+                    OnRightClick(mousePoint);
+                    break;
+                }
+                case MouseButtons.Middle:
+                {
+                    OnMiddleClick(mousePoint);
+                    break;
+                }
+            }
+        }
+
+        private void OpenMapButton_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowser = new FolderBrowserDialog();
+            //#if DEBUG
+            folderBrowser.SelectedPath = "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Data\\Wichita\\shape";
+            //#endif
+            folderBrowser.ShowDialog();
+
+            if (String.IsNullOrEmpty(folderBrowser.SelectedPath))
+                return;
+
+            string mapPath = folderBrowser.SelectedPath;
+
+            LoadMap(mapPath);
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void LayerSettings_Click(object sender, EventArgs e)
+        {
+            if (_mapAroundMap == null)
+                return;
+
+            LayerSettingsForm settingsForm = new LayerSettingsForm(_mapAroundMap);
+            settingsForm.OnLayerSettingsChanged += OnLayerSettingsChanged;
+            settingsForm.Show();
+        }
+
+        private void OnLayerSettingsChanged(LayerBase layer)
+        {
+            MapAroundControl.RedrawMap();
+        }
+
+        private void GetCellMapButton_Click(object sender, EventArgs e)
+        {
+            BoundingRectangle rectangle = MapAroundControl.GetViewBox();
+            double width = rectangle.Width;
+            double height = rectangle.Height;
+
+            double cellSize = 4E-5;
+            MapAroundCellMap cellMap = new MapAroundCellMap(_mapAroundMap, rectangle, cellSize, cellSize);
+            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
+            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("User region layer"));
+            CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
+            drawerForm.Show();
+        }
+
+        private void HpaTestingButton_Click(object sender, EventArgs e)
+        {
+            HpaTestForm testForm = new HpaTestForm(null);
+            testForm.Show();
+        }
+
+        #endregion
+
+        #region Utils
 
         private void ClearError()
         {
@@ -226,6 +472,10 @@ namespace MapAroundPathFinding
                 rectangle.MaxX, rectangle.MaxY + deltaY));
 
             _mapAroundMap.FeatureRenderer.FlushTitles(MapAroundControl.CreateGraphics(), rectangle, 1);
+
+            InitCellMap();
+            InitPathLayer();
+            InitHpaStar();
         }
 
         private void AddLayer(string shapeFilePath)
@@ -332,67 +582,13 @@ namespace MapAroundPathFinding
             SetViewBox();
         }
 
-        private void OpenMapButton_Click(object sender, EventArgs e)
-        {
-            FolderBrowserDialog folderBrowser = new FolderBrowserDialog();
-//#if DEBUG
-            folderBrowser.SelectedPath = "C:\\Users\\Dmitry\\Documents\\GitHub\\Diploma\\Data\\Wichita\\shape";
-//#endif
-            folderBrowser.ShowDialog();
-
-            if(String.IsNullOrEmpty(folderBrowser.SelectedPath))
-                return;
-
-            string mapPath = folderBrowser.SelectedPath;
-
-            LoadMap(mapPath);
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void LayerSettings_Click(object sender, EventArgs e)
-        {
-            if(_mapAroundMap == null)
-                return;
-
-            LayerSettingsForm settingsForm = new LayerSettingsForm(_mapAroundMap);
-            settingsForm.OnLayerSettingsChanged += OnLayerSettingsChanged;
-            settingsForm.Show();
-        }
-
-        private void OnLayerSettingsChanged(LayerBase layer)
-        {
-            MapAroundControl.RedrawMap();
-        }
+        
 
         private LayerBase FindLayerByAlias(string alias)
         {
             return _mapAroundMap.Layers.FirstOrDefault(l => l.Alias.Equals(alias));
         }
 
-        private void GetCellMapButton_Click(object sender, EventArgs e)
-        {
-            BoundingRectangle rectangle = MapAroundControl.GetViewBox();
-            double width = rectangle.Width;
-            double height = rectangle.Height;
-
-            double cellSize = 4E-5;
-            MapAroundCellMap cellMap = new MapAroundCellMap(_mapAroundMap, rectangle, cellSize, cellSize);
-            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("buildings"));
-            cellMap.AddPolygonObstaclesLayer((FeatureLayer)FindLayerByAlias("User region layer"));
-            CellMapDrawerForm drawerForm = new CellMapDrawerForm(cellMap);
-            drawerForm.Show();
-        }
-
-        private void HpaTestingButton_Click(object sender, EventArgs e)
-        {
-            HpaTestForm testForm = new HpaTestForm(null);
-            testForm.Show();
-        }
-
-        
+        #endregion
     }
 }

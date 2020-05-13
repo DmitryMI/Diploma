@@ -179,7 +179,6 @@ namespace MapAroundPathFinding
 
             HpaStarAlgorithm hpa = new HpaStarAlgorithm();
             hpa.HierarchicalGraph = hierarchyGraph;
-            hpa.ClusterSizeZero = clusterSize;
             hpa.OnCellViewedEvent += OnCellViewed;
 
             IList<Vector2Int> path = hpa.GetPath(_cellMap, _cellMap.DefaultStart, _cellMap.DefaultStop,

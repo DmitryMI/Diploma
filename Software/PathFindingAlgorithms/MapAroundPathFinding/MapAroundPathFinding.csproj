@@ -73,8 +73,10 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="PathFinding\MapAroundCellMap.cs" />
+    <Compile Include="PathFinding\PolygonCellFragment.cs" />
     <Compile Include="PathFinding\PolygonFillerUtil\Edge.cs" />
     <Compile Include="PathFinding\PolygonFillerUtil\PolygonFiller.cs" />
+    <Compile Include="PathFinding\RefCoordinate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="CellMapDrawerForm.resx">

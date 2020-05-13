@@ -16,7 +16,7 @@ namespace PathFinders.Algorithms.HpaStar
 
         public HierarchicalMap HierarchicalGraph { get; set; }
 
-        public int ClusterSizeZero { get; set; } = 16;
+        public int ClusterSizeZero { get; } = 16;
 
         private CellCluster _currentCellCluster;
 
@@ -27,12 +27,21 @@ namespace PathFinders.Algorithms.HpaStar
             return clusterMatrix[i, j];
         }
 
+        public void PreBuildGraph(ICellMap map)
+        {
+            Stopwatch sw = new Stopwatch();
+            Debug.WriteLine("Hierarchical graph construction started");
+            sw.Start();
+            HierarchicalGraph = HierarchicalMapGenerator.GenerateMap(map, NeighbourMode.SideOnly, ClusterSizeZero);
+            sw.Stop();
+            Debug.WriteLine($"Hierarchical graph construction finished in {sw.Elapsed}");
+        }
+
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
             if (HierarchicalGraph == null)
             {
-                HierarchicalMapGenerator.CellViewedCallback = GeneratorCellViewed;
-                HierarchicalGraph = HierarchicalMapGenerator.GenerateMap(map, NeighbourMode.SideOnly, ClusterSizeZero);
+                PreBuildGraph(map);
             }
 
             CellCluster startContainer = GetContainingCluster(HierarchicalGraph.ZeroLevelClusters, start);
@@ -136,6 +145,11 @@ namespace PathFinders.Algorithms.HpaStar
             {
                 OnCellViewedEvent?.Invoke(this, x, y, d);
             }
+        }
+
+        public void AddObstacle(ICellFragment cellCluster)
+        {
+            
         }
     }
 }
