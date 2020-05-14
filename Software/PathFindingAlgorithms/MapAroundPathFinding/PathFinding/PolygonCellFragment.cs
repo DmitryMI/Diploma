@@ -152,19 +152,10 @@ namespace MapAroundPathFinding.PathFinding
             return x >= 0 && y >= 0 && x < Width && y < Height;
         }
 
-        public int Width
-        {
-            get => _width;
-        }
+        public int Width => _width;
 
-        public int Height
-        {
-            get => _height;
-        }
+        public int Height => _height;
 
-        public Vector2Int LeftBottom
-        {
-            get => _leftBottom;
-        }
+        public Vector2Int LeftBottom => _leftBottom;
     }
 }
