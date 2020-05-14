@@ -52,6 +52,7 @@
     <Compile Include="CellMapDrawerForm.Designer.cs">
       <DependentUpon>CellMapDrawerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HpaStarTesting\CellFragment.cs" />
     <Compile Include="HpaStarTesting\HpaTestForm.cs">
       <SubType>Form</SubType>
     </Compile>

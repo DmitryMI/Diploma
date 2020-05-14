@@ -362,8 +362,8 @@ namespace MapAroundPathFinding
             Debug.WriteLine("Path finding finished!");
             RedrawMap();
 
-            CellMapDrawerForm drawerForm = CreateForm<CellMapDrawerForm>();
-            ShowCellMapDrawerForm(drawerForm, _hpaStar.LayeredCellMap, rawPath);
+            //CellMapDrawerForm drawerForm = CreateForm<CellMapDrawerForm>();
+            //ShowCellMapDrawerForm(drawerForm, _hpaStar.LayeredCellMap, rawPath);
         }
 
         private void RedrawMap()

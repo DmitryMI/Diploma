@@ -89,6 +89,18 @@ namespace PathFinders.Graphs.SimpleTypes
         }
 
         public T InfinityWeight { get; set; }
+        public bool IsInfinity(T weight)
+        {
+            if (weight is double d)
+            {
+                return Double.IsInfinity(d);
+            }
+            else
+            {
+                return weight.Equals(InfinityWeight);
+            }
+        }
+
         public new IEnumerator<IWeightedGraphNode<T>> GetEnumerator()
         {
             return new WeightedGraphNodeEnumerator<T>(this);
