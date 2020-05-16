@@ -35,9 +35,15 @@ namespace MapAroundPathFinding
             InitializeComponent();
 
             LogManager.Logger = this;
+
+#if !DEBUG
+            GetCellMapButton.Visible = false;
+            HpaTestingButton.Visible = false;
+            TestUserYButton.Visible = false;
+#endif
         }
 
-        #region RegionDrawing
+#region RegionDrawing
 
         private const int PolygonFinalizePixelDelta = 10;
         private List<ICoordinate> _points = new List<ICoordinate>();
@@ -154,6 +160,7 @@ namespace MapAroundPathFinding
             Bitmap bitmap = new Bitmap(bitmapWidth, bitmapHeight);
             RasterLayer layer;
             layer = new RasterLayer();
+            layer.Alias = $"region_line_{_rasterLayers.Count}";
             _rasterLayers.Add(layer);
             _mapAroundMap.AddLayer(layer);
 
@@ -191,9 +198,9 @@ namespace MapAroundPathFinding
             MapAroundControl.RedrawMap();
         }
 
-        #endregion
+#endregion
 
-        #region PathFinding
+#region PathFinding
         private const double DefaultCellSize =  4E-5;
         //private const double DefaultCellSize =  2E-5;
         private ICoordinate _startPoint;
@@ -427,9 +434,9 @@ namespace MapAroundPathFinding
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region EventHandlers
+#region EventHandlers
         private void MapAroundControl_MouseDown(object sender, MouseEventArgs e)
         {
 
@@ -489,7 +496,8 @@ namespace MapAroundPathFinding
 
         private void OnLayerSettingsChanged(LayerBase layer)
         {
-            MapAroundControl.RedrawMap();
+            //MapAroundControl.RedrawMap();
+            RedrawMap();
         }
 
         private void GetCellMapButton_Click(object sender, EventArgs e)
@@ -512,9 +520,9 @@ namespace MapAroundPathFinding
             testForm.Show();
         }
 
-        #endregion
+#endregion
 
-        #region Utils
+#region Utils
 
         private void ClearError()
         {
@@ -660,7 +668,7 @@ namespace MapAroundPathFinding
             return _mapAroundMap.Layers.FirstOrDefault(l => l.Alias.Equals(alias));
         }
 
-        #endregion
+#endregion
 
         private void TestUserYButton_Click(object sender, EventArgs e)
         {

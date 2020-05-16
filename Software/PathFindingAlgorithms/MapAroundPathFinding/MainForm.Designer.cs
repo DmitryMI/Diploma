@@ -143,7 +143,7 @@
             this.Controls.Add(this.OpenMapButton);
             this.Controls.Add(this.MapAroundControl);
             this.Name = "MainForm";
-            this.Text = "MainForm";
+            this.Text = "Поиск кратчайшего безопасного пути";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.MainStatusStrip.ResumeLayout(false);
             this.MainStatusStrip.PerformLayout();
