@@ -428,6 +428,8 @@ namespace PathFinders.Algorithms
             {
                 CreateLayeredMap(map);
             }
+
+            map = _layeredCellMap;
             var rawPath = GetPath(_layeredCellMap, start, stop, neighbourMode);
             if (rawPath == null)
             {

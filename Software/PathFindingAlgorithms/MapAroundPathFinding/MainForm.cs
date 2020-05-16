@@ -225,7 +225,7 @@ namespace MapAroundPathFinding
 
         private void InitHpaStar()
         {
-            _pathFinder = new HpaStarAlgorithm();
+            _pathFinder = new CellPathFinderFactory(CellPathFinderAlgorithms.AStarAlgorithm);
 
             SetUiActive(false);
             
@@ -328,38 +328,55 @@ namespace MapAroundPathFinding
 
         private void GetPathJob()
         {
-            _pathFinder.ClearObstacles();
-            foreach (var feature in _userRegionLayer.Features)
+            try
             {
-                if (feature.FeatureType == FeatureType.Polygon)
+                _pathFinder.ClearObstacles();
+                foreach (var feature in _userRegionLayer.Features)
                 {
-                    PolygonCellFragment cellFragment =
-                        new PolygonCellFragment(feature, _initialRectangle, DefaultCellSize, DefaultCellSize);
-                    _pathFinder.AddObstacle(cellFragment);
+                    if (feature.FeatureType == FeatureType.Polygon)
+                    {
+                        PolygonCellFragment cellFragment =
+                            new PolygonCellFragment(feature, _initialRectangle, DefaultCellSize, DefaultCellSize);
+                        _pathFinder.AddObstacle(cellFragment);
+                    }
                 }
+
+                _pathFinder.RecalculateObstacles();
+
+                Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
+                Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
+
+                var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int,
+                    NeighbourMode.SidesAndDiagonals);
+                //var rawPath = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+
+                if (path == null)
+                {
+                    MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                else
+                {
+                    DrawPath(path);
+                    //DrawPath(rawPath);
+                }
+                
             }
-
-            _pathFinder.RecalculateObstacles();
-
-            Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
-            Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
-
-            var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
-            //var path = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
-
-            if (path == null)
+            catch (OutOfMapBoundsException)
             {
-                MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Указанные точки находятся за пределами загруженной карты", "Ошибка ввода",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else
+            catch (Exception ex)
             {
-                DrawPath(path);
+                MessageBox.Show(ex.Message, "Необработанная ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            _startPoint = null;
-            _endPoint = null;
-
-            SetUiActive(true);
+            finally
+            {
+                _startPoint = null;
+                _endPoint = null;
+                SetUiActive(true);
+            }
         }
 
         private void DrawPath(IList<Vector2Int> path)

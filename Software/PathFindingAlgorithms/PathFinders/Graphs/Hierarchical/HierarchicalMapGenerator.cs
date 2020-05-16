@@ -353,6 +353,12 @@ namespace PathFinders.Graphs.Hierarchical
         {
             int i = point.X / clusterWidth;
             int j = point.Y / clusterHeight;
+
+            if (i < 0 || j < 0 || i >= clusterMatrix.GetLength(0) || j >= clusterMatrix.GetLength(1))
+            {
+                throw new OutOfMapBoundsException();
+            }
+
             return clusterMatrix[i, j];
         }
 
