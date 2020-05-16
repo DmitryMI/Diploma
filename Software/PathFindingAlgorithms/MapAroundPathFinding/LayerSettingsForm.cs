@@ -28,7 +28,7 @@ namespace MapAroundPathFinding
                 set => SetChecked(value);
             }
 
-            public void SetChecked(bool val)
+            private void SetChecked(bool val)
             {
                 Layer.Visible = val;
                 Debug.WriteLine($"Layer {Layer.GetType()}({Layer.Alias}) visibility changed to {Layer.Visible}");
