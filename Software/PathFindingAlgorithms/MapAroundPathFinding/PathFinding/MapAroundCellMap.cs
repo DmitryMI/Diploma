@@ -129,7 +129,6 @@ namespace MapAroundPathFinding.PathFinding
         public bool IsInBounds(int x, int y)
         {
             return x >= 0 && y >= 0 && x < Width && y < Height;
-            //return _mapCells[x, y];
         }
 
         public Bitmap ToBitmap()

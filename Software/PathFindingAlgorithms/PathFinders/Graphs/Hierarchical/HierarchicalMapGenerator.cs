@@ -241,9 +241,7 @@ namespace PathFinders.Graphs.Hierarchical
                         clusterA.TransitionNodes.RemoveAt(i);
                         clusterB.TransitionNodes.RemoveAt(j);
 
-                        //graph.Nodes.Remove((HierarchicalGraphNode)transitionNode);
                         RemoveNode(graph, (HierarchicalGraphNode)transitionNode);
-                        //graph.Nodes.Remove((HierarchicalGraphNode) bTransitionNode);
                         RemoveNode(graph, (HierarchicalGraphNode)bTransitionNode);
                         i--;
                         j--;

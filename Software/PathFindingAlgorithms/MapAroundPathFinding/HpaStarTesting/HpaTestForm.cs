@@ -188,7 +188,7 @@ namespace MapAroundPathFinding
             {
                 _hpaStar.AddObstacle(obstacle);
             }
-            _hpaStar.RecalculateHierarchicalGraph();
+            _hpaStar.RecalculateObstacles();
 
             DrawCellBorders();
 

@@ -65,6 +65,7 @@ namespace PathFinders.Algorithms.HpaStar
             _layerBase = layerBase;
         }
 
+        [Obsolete("Use AddFragment instead")]
         public void AddLayer(ICellMap layer)
         {
             _layers.Add(layer);

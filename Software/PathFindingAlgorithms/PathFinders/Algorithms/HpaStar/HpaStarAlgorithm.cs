@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using PathFinders.Graphs;
 using PathFinders.Graphs.Hierarchical;
 using PathFinders.Graphs.Hierarchical.SimpleTypes;
+using PathFinders.Logging;
 
 namespace PathFinders.Algorithms.HpaStar
 {
@@ -39,15 +41,6 @@ namespace PathFinders.Algorithms.HpaStar
             HierarchicalGraph = generator.GenerateMap(map, NeighbourMode.SideOnly, ClusterSizeZero);
             sw.Stop();
             Debug.WriteLine($"Hierarchical graph construction finished in {sw.Elapsed}");
-        }
-
-        public void Initialize(ICellMap mapBase, int clusterSize = 16)
-        {
-            _mapBase = mapBase;
-            _layeredCellMap = new LayeredCellMap(_mapBase);
-            ClusterSizeZero = clusterSize;
-            PreBuildGraph(_layeredCellMap);
-            _isInitialized = true;
         }
 
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
@@ -88,8 +81,17 @@ namespace PathFinders.Algorithms.HpaStar
                         CoordinateTransformer transformer =
                             new CoordinateTransformer(nodeA.ParentCluster, nodeA.ParentCluster.LeftBottom);
                         _currentCellCluster = nodeA.ParentCluster;
-                        IList<Vector2Int> realPath = aStarAlgorithm.GetPath(transformer, nodeA.Position - transformer.Transform,
-                            nodeB.Position - transformer.Transform, neighbourMode);
+                        Vector2Int clusterStart = nodeA.Position - transformer.Transform;
+                        Vector2Int clusterStop = nodeB.Position - transformer.Transform;
+                        IList<Vector2Int> realPath = aStarAlgorithm.GetPathSingleLayer(transformer, clusterStart, clusterStop, neighbourMode);
+
+                        if (realPath == null)
+                        {
+                            var bitmap = CellMapToBitmap.GetBitmap(nodeA.ParentCluster, 16, clusterStart, clusterStop, null);
+                            LogManager.Log($"Path in cluster not found. Start: {clusterStart}; Stop: {clusterStop}. Bitmap printed");
+                            LogManager.Log(bitmap);
+                            throw new InvalidOperationException();
+                        }
 
                         TransformPath(realPath, transformer.Transform);
                         realPath = Utils.GetInvertedList(realPath);
@@ -103,6 +105,18 @@ namespace PathFinders.Algorithms.HpaStar
             DestroyConnections(stopNode);
             DestroyData(HierarchicalGraph.ZeroLevelClusters);
 
+            return path;
+        }
+
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            var rawPath = GetPath(map, start, stop, neighbourMode);
+            if (rawPath == null)
+            {
+                return null;
+            }
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(_layeredCellMap, rawPath);
             return path;
         }
 
@@ -165,7 +179,7 @@ namespace PathFinders.Algorithms.HpaStar
             _userObstacles.Clear();
         }
 
-        public void RecalculateHierarchicalGraph(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
+        public void RecalculateObstacles(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
         {
             HierarchicalMapGenerator generator = new HierarchicalMapGenerator();
 
@@ -184,6 +198,20 @@ namespace PathFinders.Algorithms.HpaStar
             }
 
             generator.UpdateGraph(_layeredCellMap, _userObstacles, HierarchicalGraph, neighbourMode);
+        }
+
+        public void Initialize(ICellMap mapBase)
+        {
+            Initialize(mapBase, 16);
+        }
+
+        public void Initialize(ICellMap mapBase, int clusterSize)
+        {
+            _mapBase = mapBase;
+            _layeredCellMap = new LayeredCellMap(_mapBase);
+            ClusterSizeZero = clusterSize;
+            PreBuildGraph(_layeredCellMap);
+            _isInitialized = true;
         }
     }
 }

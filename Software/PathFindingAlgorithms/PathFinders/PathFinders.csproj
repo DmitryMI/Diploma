@@ -74,6 +74,8 @@
     <Compile Include="ICellMap.cs" />
     <Compile Include="ICellPathFinder.cs" />
     <Compile Include="Algorithms\LeeAlgorithm.cs" />
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\LogManager.cs" />
     <Compile Include="NeighbourMode.cs" />
     <Compile Include="Steps.cs" />
     <Compile Include="Vector2Int.cs" />
@@ -84,5 +86,6 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
