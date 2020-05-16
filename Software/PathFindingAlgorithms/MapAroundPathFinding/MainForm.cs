@@ -20,11 +20,12 @@ using PathFinders;
 using PathFinders.Algorithms;
 using PathFinders.Algorithms.HpaStar;
 using PathFinders.Algorithms.PathSmoothing;
+using PathFinders.Logging;
 using Coordinate = MapAround.Geometry.Coordinate;
 
 namespace MapAroundPathFinding
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, ILogger
     {
         private Map _mapAroundMap;
         private BoundingRectangle _initialRectangle;
@@ -32,6 +33,8 @@ namespace MapAroundPathFinding
         public MainForm()
         {
             InitializeComponent();
+
+            LogManager.Logger = this;
         }
 
         #region RegionDrawing
@@ -196,7 +199,7 @@ namespace MapAroundPathFinding
         private ICoordinate _startPoint;
         private ICoordinate _endPoint;
         private MapAroundCellMap _cellMap;
-        private HpaStarAlgorithm _hpaStar;
+        private ICellPathFinder _pathFinder;
         private Task _backgroundTask;
         private FeatureLayer _pathFeatureLayer;
         private bool _pathFindingUiActive = true;
@@ -222,7 +225,7 @@ namespace MapAroundPathFinding
 
         private void InitHpaStar()
         {
-            _hpaStar = new HpaStarAlgorithm();
+            _pathFinder = new CellPathFinderFactory(CellPathFinderAlgorithms.AStarAlgorithm);
 
             SetUiActive(false);
             
@@ -232,7 +235,7 @@ namespace MapAroundPathFinding
 
         private void PreBuildGraphJob()
         {
-            _hpaStar.Initialize(_cellMap);
+            _pathFinder.Initialize(_cellMap);
             SetUiActive(true);
         }
 
@@ -280,7 +283,6 @@ namespace MapAroundPathFinding
         {
             Debug.WriteLine("Path finding started...");
             ClearPathLayer();
-            
 
             SetUiActive(false);
             _backgroundTask = new Task(GetPathJob, TaskCreationOptions.LongRunning);
@@ -296,6 +298,18 @@ namespace MapAroundPathFinding
             }
             Debug.WriteLine($"CellMapDrawerForm showed on thread {Thread.CurrentThread.ManagedThreadId}");
             form.ShowMap(map, path);
+        }
+
+        private void ShowBitmapDrawer(BitmapDrawerForm drawerForm, Bitmap bitmap)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<BitmapDrawerForm, Bitmap>(ShowBitmapDrawer), drawerForm, bitmap);
+                return;
+            }
+
+            drawerForm.DrawBitmap(bitmap);
+            drawerForm.Show();
         }
 
         private T CreateForm<T>() where T: Form
@@ -314,43 +328,59 @@ namespace MapAroundPathFinding
 
         private void GetPathJob()
         {
-            _hpaStar.ClearObstacles();
-            foreach (var feature in _userRegionLayer.Features)
+            try
             {
-                if (feature.FeatureType == FeatureType.Polygon)
+                _pathFinder.ClearObstacles();
+                foreach (var feature in _userRegionLayer.Features)
                 {
-                    PolygonCellFragment cellFragment =
-                        new PolygonCellFragment(feature, _initialRectangle, DefaultCellSize, DefaultCellSize);
-                    _hpaStar.AddObstacle(cellFragment);
+                    if (feature.FeatureType == FeatureType.Polygon)
+                    {
+                        PolygonCellFragment cellFragment =
+                            new PolygonCellFragment(feature, _initialRectangle, DefaultCellSize, DefaultCellSize);
+                        _pathFinder.AddObstacle(cellFragment);
+                    }
                 }
+
+                _pathFinder.RecalculateObstacles();
+
+                Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
+                Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
+
+                var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int,
+                    NeighbourMode.SidesAndDiagonals);
+                //var rawPath = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+
+                if (path == null)
+                {
+                    MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                else
+                {
+                    DrawPath(path);
+                    //DrawPath(rawPath);
+                }
+                
             }
-
-            _hpaStar.RecalculateHierarchicalGraph();
-
-            Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
-            Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
-
-            var path = _hpaStar.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
-
-            if (path == null)
+            catch (OutOfMapBoundsException)
             {
-                MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Указанные точки находятся за пределами загруженной карты", "Ошибка ввода",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else
+            catch (Exception ex)
             {
-                DrawPath(path);
+                MessageBox.Show(ex.Message, "Необработанная ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            _startPoint = null;
-            _endPoint = null;
-
-            SetUiActive(true);
+            finally
+            {
+                _startPoint = null;
+                _endPoint = null;
+                SetUiActive(true);
+            }
         }
 
-        private void DrawPath(IList<Vector2Int> rawPath)
+        private void DrawPath(IList<Vector2Int> path)
         {
-            PathSmoother smoother = new PathSmoother();
-            var path = smoother.GetSmoothedPath(_hpaStar.LayeredCellMap, rawPath);
             foreach (var cell in path)
             {
                 ICoordinate coordinate = ProjectFromCellMap(cell);
@@ -362,8 +392,8 @@ namespace MapAroundPathFinding
             Debug.WriteLine("Path finding finished!");
             RedrawMap();
 
-            CellMapDrawerForm drawerForm = CreateForm<CellMapDrawerForm>();
-            ShowCellMapDrawerForm(drawerForm, _hpaStar.LayeredCellMap, rawPath);
+            //CellMapDrawerForm drawerForm = CreateForm<CellMapDrawerForm>();
+            //ShowCellMapDrawerForm(drawerForm, _hpaStar.LayeredCellMap, rawPath);
         }
 
         private void RedrawMap()
@@ -649,6 +679,17 @@ namespace MapAroundPathFinding
 
             _userRegionLayer.AddFeature(polygonFeature);
             RedrawMap();
+        }
+
+        public void Log(string message, int errorLevel)
+        {
+            Debug.WriteLine(message);
+        }
+
+        public void Log(Bitmap bmp)
+        {
+            BitmapDrawerForm drawerForm = CreateForm<BitmapDrawerForm>();
+            ShowBitmapDrawer(drawerForm, bmp);
         }
     }
 }

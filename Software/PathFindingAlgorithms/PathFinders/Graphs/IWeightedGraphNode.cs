@@ -12,5 +12,7 @@ namespace PathFinders.Graphs
         void SetWeight(IWeightedGraphNode<T> connection, T weight);
 
         T InfinityWeight { get; set; }
+
+        bool IsInfinity(T weight);
     }
 }

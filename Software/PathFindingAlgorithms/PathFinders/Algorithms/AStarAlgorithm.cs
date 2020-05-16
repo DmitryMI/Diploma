@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PathFinders.Algorithms.HpaStar;
 using PathFinders.Graphs;
 using PathFinders.Graphs.SimpleTypes;
+using PathFinders.Logging;
 
 namespace PathFinders.Algorithms
 {
     public class AStarAlgorithm : ICellPathFinder, IGraphPathFinder, IWeightedGraphPathFinder<double>, IComparer<IGraphNode>
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
+
+        private LayeredCellMap _layeredCellMap;
 
         private struct GraphData
         {
@@ -173,6 +177,11 @@ namespace PathFinders.Algorithms
             return nodePath;
         }
 
+        private void CreateLayeredMap(ICellMap mapBase)
+        {
+            _layeredCellMap = new LayeredCellMap(mapBase);
+        }
+
         public IList<IGraphNode> GetPath(IGraph map, IGraphNode startNode, IGraphNode stopNode)
         {
             if (startNode == null || stopNode == null)
@@ -268,15 +277,20 @@ namespace PathFinders.Algorithms
             return path;
         }
 
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        public IList<Vector2Int> GetPath(ICellMap mapBase, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
+            if (_layeredCellMap == null)
+            {
+                CreateLayeredMap(mapBase);
+            }
+
             if (neighbourMode == NeighbourMode.SideOnly)
             {
-                GraphNode[,] graphNodes = GraphGenerator.GetGraph(map, neighbourMode);
-                IGraphNode[,] nodesInterface = new IGraphNode[map.Width, map.Height];
-                for (int i = 0; i < map.Width; i++)
+                GraphNode[,] graphNodes = GraphGenerator.GetGraph(_layeredCellMap, neighbourMode);
+                IGraphNode[,] nodesInterface = new IGraphNode[_layeredCellMap.Width, _layeredCellMap.Height];
+                for (int i = 0; i < _layeredCellMap.Width; i++)
                 {
-                    for (int j = 0; j < map.Height; j++)
+                    for (int j = 0; j < _layeredCellMap.Height; j++)
                     {
                         if (graphNodes[i, j] == null)
                             continue;
@@ -305,7 +319,8 @@ namespace PathFinders.Algorithms
             }
             else
             {
-                IWeightedGraph<double> graph = GraphGenerator.GetWeightedGraph(map, NeighbourMode.SidesAndDiagonals);
+                IWeightedGraph<double> graph = GraphGenerator.GetWeightedGraph(_layeredCellMap, NeighbourMode.SidesAndDiagonals);
+                //LogManager.Log(CellMapToBitmap.GetBitmap(graph, start, _layeredCellMap.Width, _layeredCellMap.Height, 1));
                 var nodes = graph.GetWeightedGraphNodes();
                 IWeightedGraphNode<double> startNode = null, stopNode = null;
                 foreach (var node in nodes)
@@ -335,6 +350,114 @@ namespace PathFinders.Algorithms
 
                 return path;
             }
+        }
+
+        [Obsolete("User GetPath instead")]
+        public IList<Vector2Int> GetPathSingleLayer(ICellMap mapBase, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            if (neighbourMode == NeighbourMode.SideOnly)
+            {
+                GraphNode[,] graphNodes = GraphGenerator.GetGraph(mapBase, neighbourMode);
+                IGraphNode[,] nodesInterface = new IGraphNode[mapBase.Width, mapBase.Height];
+                for (int i = 0; i < mapBase.Width; i++)
+                {
+                    for (int j = 0; j < mapBase.Height; j++)
+                    {
+                        if (graphNodes[i, j] == null)
+                            continue;
+                        graphNodes[i, j].Data = new GraphData();
+                        SetPosition(graphNodes[i, j], new Vector2Int(i, j));
+                        nodesInterface[i, j] = graphNodes[i, j];
+                    }
+                }
+
+                IGraphNode startNode = graphNodes[start.X, start.Y];
+                IGraphNode stopNode = graphNodes[stop.X, stop.Y];
+
+
+                Graph graph = new Graph(nodesInterface);
+
+                var nodePath = GetPath(graph, startNode, stopNode);
+                if (nodePath == null)
+                    return null;
+                List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
+                foreach (var node in nodePath)
+                {
+                    path.Add(node.Position);
+                }
+
+                return path;
+            }
+            else
+            {
+                IWeightedGraph<double> graph = GraphGenerator.GetWeightedGraph(mapBase, NeighbourMode.SidesAndDiagonals);
+                var nodes = graph.GetWeightedGraphNodes();
+                IWeightedGraphNode<double> startNode = null, stopNode = null;
+                foreach (var node in nodes)
+                {
+                    if (node == null)
+                        continue;
+                    node.Data = new GraphData();
+                    if (node.Position == start)
+                    {
+                        startNode = node;
+                    }
+
+                    if (node.Position == stop)
+                    {
+                        stopNode = node;
+                    }
+                }
+
+                var nodePath = GetPath(graph, startNode, stopNode);
+                if (nodePath == null)
+                    return null;
+                List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
+                foreach (var node in nodePath)
+                {
+                    path.Add(node.Position);
+                }
+
+                return path;
+            }
+        }
+
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            if (_layeredCellMap == null)
+            {
+                CreateLayeredMap(map);
+            }
+
+            map = _layeredCellMap;
+            var rawPath = GetPath(_layeredCellMap, start, stop, neighbourMode);
+            if (rawPath == null)
+            {
+                return null;
+            }
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(map, rawPath);
+            return path;
+        }
+
+        public void AddObstacle(ICellFragment cellCluster)
+        {
+            _layeredCellMap.AddFragment(cellCluster);
+        }
+
+        public void ClearObstacles()
+        {
+            _layeredCellMap.ClearLayers();
+        }
+
+        public void RecalculateObstacles(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
+        {
+            
+        }
+
+        public void Initialize(ICellMap mapBase)
+        {
+            CreateLayeredMap(mapBase);
         }
 
         public int Compare(IGraphNode aGraphNode, IGraphNode bGraphNode)

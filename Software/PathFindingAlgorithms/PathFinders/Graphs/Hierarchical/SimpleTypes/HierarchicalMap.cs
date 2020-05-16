@@ -14,14 +14,20 @@ namespace PathFinders.Graphs.Hierarchical.SimpleTypes
 
         public CellCluster[,] ZeroLevelClusters { get; set; }
 
-        public HierarchicalMap(HierarchicalGraphNode[] nodes)
+        public int ClusterDefaultWidth { get; }
+        public int ClusterDefaultHeight { get; }
+
+        public HierarchicalMap(HierarchicalGraphNode[] nodes, int clusterDefaultWidth, int clusterDefaultHeight)
         {
             _nodes.AddRange(nodes);
+            ClusterDefaultWidth = clusterDefaultWidth;
+            ClusterDefaultHeight = clusterDefaultHeight;
         }
 
-        public HierarchicalMap()
+        public HierarchicalMap(int clusterDefaultWidth, int clusterDefaultHeight)
         {
-           
+            ClusterDefaultWidth = clusterDefaultWidth;
+            ClusterDefaultHeight = clusterDefaultHeight;
         }
 
 

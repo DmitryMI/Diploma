@@ -46,12 +46,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitmapDrawerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BitmapDrawerForm.Designer.cs">
+      <DependentUpon>BitmapDrawerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="CellMapDrawerForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CellMapDrawerForm.Designer.cs">
       <DependentUpon>CellMapDrawerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HpaStarTesting\CellFragment.cs" />
     <Compile Include="HpaStarTesting\HpaTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -79,6 +86,9 @@
     <Compile Include="PathFinding\RefCoordinate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="BitmapDrawerForm.resx">
+      <DependentUpon>BitmapDrawerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CellMapDrawerForm.resx">
       <DependentUpon>CellMapDrawerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -101,6 +111,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

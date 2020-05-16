@@ -65,6 +65,7 @@ namespace PathFinders.Algorithms.HpaStar
             _layerBase = layerBase;
         }
 
+        [Obsolete("Use AddFragment instead")]
         public void AddLayer(ICellMap layer)
         {
             _layers.Add(layer);
@@ -75,6 +76,24 @@ namespace PathFinders.Algorithms.HpaStar
         {
             _layers.Add(fragment);
             _layerOffsets.Add(fragment.LeftBottom);
+        }
+
+        public void RemoveLayer(int i)
+        {
+            _layers.RemoveAt(i);
+            _layerOffsets.RemoveAt(i);
+        }
+
+        public void RemoveLayer(ICellMap layer)
+        {
+            int index = _layers.IndexOf(layer);
+            RemoveLayer(index);
+        }
+
+        public void ClearLayers()
+        {
+            _layers.Clear();
+            _layerOffsets.Clear();
         }
     }
 }

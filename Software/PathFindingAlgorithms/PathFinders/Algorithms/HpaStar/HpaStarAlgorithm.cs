@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using PathFinders.Graphs;
 using PathFinders.Graphs.Hierarchical;
 using PathFinders.Graphs.Hierarchical.SimpleTypes;
+using PathFinders.Logging;
 
 namespace PathFinders.Algorithms.HpaStar
 {
@@ -16,7 +18,7 @@ namespace PathFinders.Algorithms.HpaStar
 
         public HierarchicalMap HierarchicalGraph { get; set; }
 
-        public int ClusterSizeZero { get; } = 16;
+        public int ClusterSizeZero { get; private set; } = 16;
 
         private CellCluster _currentCellCluster;
         private bool _isInitialized = false;
@@ -24,32 +26,21 @@ namespace PathFinders.Algorithms.HpaStar
         private LayeredCellMap _layeredCellMap;
 
         private List<ICellFragment> _userObstacles = new List<ICellFragment>();
+        private List<ICellFragment> _removedObstacles = new List<ICellFragment>();
 
         public ICellMap LayeredCellMap => _layeredCellMap;
 
-        private CellCluster GetContainingCluster(CellCluster[,] clusterMatrix, Vector2Int point)
-        {
-            int i = point.X / ClusterSizeZero;
-            int j = point.Y / ClusterSizeZero;
-            return clusterMatrix[i, j];
-        }
+        
 
         private void PreBuildGraph(ICellMap map)
         {
             Stopwatch sw = new Stopwatch();
             Debug.WriteLine("Hierarchical graph construction started");
             sw.Start();
-            HierarchicalGraph = HierarchicalMapGenerator.GenerateMap(map, NeighbourMode.SideOnly, ClusterSizeZero);
+            HierarchicalMapGenerator generator = new HierarchicalMapGenerator();
+            HierarchicalGraph = generator.GenerateMap(map, NeighbourMode.SideOnly, ClusterSizeZero);
             sw.Stop();
             Debug.WriteLine($"Hierarchical graph construction finished in {sw.Elapsed}");
-        }
-
-        public void Initialize(ICellMap mapBase)
-        {
-            _mapBase = mapBase;
-            _layeredCellMap = new LayeredCellMap(_mapBase);
-            PreBuildGraph(_layeredCellMap);
-            _isInitialized = true;
         }
 
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
@@ -59,8 +50,8 @@ namespace PathFinders.Algorithms.HpaStar
                 Initialize(map);
             }
 
-            CellCluster startContainer = GetContainingCluster(HierarchicalGraph.ZeroLevelClusters, start);
-            CellCluster stopContainer = GetContainingCluster(HierarchicalGraph.ZeroLevelClusters, stop);
+            CellCluster startContainer = HierarchicalMapGenerator.GetContainingCluster(HierarchicalGraph.ZeroLevelClusters, ClusterSizeZero, ClusterSizeZero, start);
+            CellCluster stopContainer = HierarchicalMapGenerator.GetContainingCluster(HierarchicalGraph.ZeroLevelClusters, ClusterSizeZero, ClusterSizeZero, stop);
 
             HierarchicalGraphNode startNode = new HierarchicalGraphNode();
             startNode.Position = start;
@@ -90,8 +81,17 @@ namespace PathFinders.Algorithms.HpaStar
                         CoordinateTransformer transformer =
                             new CoordinateTransformer(nodeA.ParentCluster, nodeA.ParentCluster.LeftBottom);
                         _currentCellCluster = nodeA.ParentCluster;
-                        IList<Vector2Int> realPath = aStarAlgorithm.GetPath(transformer, nodeA.Position - transformer.Transform,
-                            nodeB.Position - transformer.Transform, neighbourMode);
+                        Vector2Int clusterStart = nodeA.Position - transformer.Transform;
+                        Vector2Int clusterStop = nodeB.Position - transformer.Transform;
+                        IList<Vector2Int> realPath = aStarAlgorithm.GetPathSingleLayer(transformer, clusterStart, clusterStop, neighbourMode);
+
+                        if (realPath == null)
+                        {
+                            var bitmap = CellMapToBitmap.GetBitmap(nodeA.ParentCluster, 16, clusterStart, clusterStop, null);
+                            LogManager.Log($"Path in cluster not found. Start: {clusterStart}; Stop: {clusterStop}. Bitmap printed");
+                            LogManager.Log(bitmap);
+                            throw new InvalidOperationException();
+                        }
 
                         TransformPath(realPath, transformer.Transform);
                         realPath = Utils.GetInvertedList(realPath);
@@ -105,6 +105,18 @@ namespace PathFinders.Algorithms.HpaStar
             DestroyConnections(stopNode);
             DestroyData(HierarchicalGraph.ZeroLevelClusters);
 
+            return path;
+        }
+
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            var rawPath = GetPath(map, start, stop, neighbourMode);
+            if (rawPath == null)
+            {
+                return null;
+            }
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(_layeredCellMap, rawPath);
             return path;
         }
 
@@ -163,17 +175,43 @@ namespace PathFinders.Algorithms.HpaStar
 
         public void ClearObstacles()
         {
+            _removedObstacles.AddRange(_userObstacles);
             _userObstacles.Clear();
         }
 
-        public void RecalculateHierarchicalGraph()
+        public void RecalculateObstacles(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
         {
-            // TODO Use better way
+            HierarchicalMapGenerator generator = new HierarchicalMapGenerator();
+
+            foreach (var removedObstacle in _removedObstacles)
+            {
+                _layeredCellMap.RemoveLayer(removedObstacle);
+            }
+
+            generator.UpdateGraph(_layeredCellMap, _removedObstacles, HierarchicalGraph, neighbourMode);
+
+            _removedObstacles.Clear();
+           
             foreach (var obstacle in _userObstacles)
             {
                 _layeredCellMap.AddFragment(obstacle);
             }
+
+            generator.UpdateGraph(_layeredCellMap, _userObstacles, HierarchicalGraph, neighbourMode);
+        }
+
+        public void Initialize(ICellMap mapBase)
+        {
+            Initialize(mapBase, 16);
+        }
+
+        public void Initialize(ICellMap mapBase, int clusterSize)
+        {
+            _mapBase = mapBase;
+            _layeredCellMap = new LayeredCellMap(_mapBase);
+            ClusterSizeZero = clusterSize;
             PreBuildGraph(_layeredCellMap);
+            _isInitialized = true;
         }
     }
 }
