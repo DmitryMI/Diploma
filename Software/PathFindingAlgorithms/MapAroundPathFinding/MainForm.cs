@@ -225,7 +225,7 @@ namespace MapAroundPathFinding
 
         private void InitHpaStar()
         {
-            _pathFinder = new CellPathFinderFactory(CellPathFinderAlgorithms.AStarAlgorithm);
+            _pathFinder = new CellPathFinderFactory(CellPathFinderAlgorithms.HpaStarAlgorithm);
 
             SetUiActive(false);
             
