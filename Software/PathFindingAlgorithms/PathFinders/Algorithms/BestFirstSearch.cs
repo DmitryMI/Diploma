@@ -22,6 +22,10 @@ namespace PathFinders.Algorithms
 
         private T GetData<T>(IGraphNode node)
         {
+            if (node == null)
+            {
+                return default(T);
+            }
             return (T) node.Data;
         }
 
@@ -69,7 +73,7 @@ namespace PathFinders.Algorithms
                 IGraphNode currentNode = openNodes[0];
                 openNodes.RemoveAt(0);
 
-                if (IsClosed(currentNode))
+                if (currentNode == null || IsClosed(currentNode))
                 {
                     //Console.WriteLine("Processing closed node!");
                     continue;
@@ -144,6 +148,10 @@ namespace PathFinders.Algorithms
             }
 
             var nodePath = GetPath(graph, startNode, stopNode);
+            if (nodePath == null)
+            {
+                return null;
+            }
             List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
             foreach (var node in nodePath)
             {
@@ -155,6 +163,13 @@ namespace PathFinders.Algorithms
 
         public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
+            if (_layeredCellMap == null)
+            {
+                _layeredCellMap = new LayeredCellMap(map);
+            }
+
+            map = _layeredCellMap;
+
             var rawPath = GetPath(map, start, stop, neighbourMode);
             if (rawPath == null)
             {

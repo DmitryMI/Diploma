@@ -51,6 +51,8 @@
     <Compile Include="Algorithms\PathSmoothing\BrezenghemLine.cs" />
     <Compile Include="Algorithms\Utils.cs" />
     <Compile Include="CellMapToBitmap.cs" />
+    <Compile Include="CellPathFinderAlgorithms.cs" />
+    <Compile Include="CellPathFinderFactory.cs" />
     <Compile Include="Graphs\Hierarchical\HierarchicalMapGenerator.cs" />
     <Compile Include="Graphs\Hierarchical\ICellCluster.cs" />
     <Compile Include="Graphs\Hierarchical\SimpleTypes\CellCluster.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\LogManager.cs" />
     <Compile Include="NeighbourMode.cs" />
+    <Compile Include="OutOfMapBoundsException.cs" />
     <Compile Include="Steps.cs" />
     <Compile Include="Vector2Int.cs" />
     <Compile Include="Graphs\SimpleTypes\MatrixWeightedGraph.cs" />
