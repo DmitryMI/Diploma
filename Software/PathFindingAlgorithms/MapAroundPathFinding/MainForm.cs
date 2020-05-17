@@ -253,6 +253,7 @@ namespace MapAroundPathFinding
             _pathFeatureLayer.PointStyle.Size = 10;
             _pathFeatureLayer.PointStyle.Symbol = '*';
             _pathFeatureLayer.Visible = true;
+            _pathFeatureLayer.Alias = "Path";
             _mapAroundMap.AddLayer(_pathFeatureLayer);
         }
 
@@ -631,6 +632,8 @@ namespace MapAroundPathFinding
                 FileInfo file = new FileInfo(shapeFilePath);
                 PrintError($"{file.Name} не распознан как допустимый слой");
             }
+
+            Debug.WriteLine($"Layer '{featureLayer.Alias}' added");
 
             _mapAroundMap.AddLayer(featureLayer);
         }
