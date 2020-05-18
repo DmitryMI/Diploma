@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using PathFinders.Algorithms.HpaStar;
+using PathFinders.Algorithms.PathSmoothing;
 using PathFinders.Graphs;
 using PathFinders.Graphs.SimpleTypes;
 using PathFinders.Logging;

@@ -59,7 +59,7 @@ namespace PathFindingAlgorithms
             Console.WriteLine("Press any key to start...");
             Console.ReadKey();
 
-            FileStream mapFileStream = File.Open("Maps/vadim_maze.cmap", FileMode.Open, FileAccess.Read);
+            FileStream mapFileStream = File.Open("Maps/trap.cmap", FileMode.Open, FileAccess.Read);
 
             ConsoleMap map = ConsoleMapGenerator.FromText(mapFileStream, 'S', 'E', 'X', '.');
             _map = map;

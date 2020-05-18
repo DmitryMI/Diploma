@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
 using PathFinders.Algorithms;
+using PathFinders.Algorithms.PathSmoothing;
 
 namespace MapAroundPathFinding
 {

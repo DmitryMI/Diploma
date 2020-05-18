@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using PathFinders.Algorithms.HpaStar;
+using PathFinders.Algorithms.PathSmoothing;
 
 namespace PathFinders.Algorithms
 {

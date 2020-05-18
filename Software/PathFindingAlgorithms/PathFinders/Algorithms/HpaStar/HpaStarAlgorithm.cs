@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PathFinders.Algorithms.PathSmoothing;
 using PathFinders.Graphs;
 using PathFinders.Graphs.Hierarchical;
 using PathFinders.Graphs.Hierarchical.SimpleTypes;

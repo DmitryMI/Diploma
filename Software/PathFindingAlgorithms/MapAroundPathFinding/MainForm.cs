@@ -354,9 +354,8 @@ namespace MapAroundPathFinding
                 Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
                 Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
 
-                var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int,
-                    NeighbourMode.SidesAndDiagonals);
-                //var rawPath = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+                var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+                //var path = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
 
                 if (path == null)
                 {

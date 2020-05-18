@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PathFinders.Algorithms.PathSmoothing;
 using PathFinders.Graphs;
 using PathFinders.Graphs.SimpleTypes;
 
