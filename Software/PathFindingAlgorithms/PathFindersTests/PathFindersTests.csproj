@@ -57,6 +57,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Algorithms\UtilsTests.cs" />
+    <Compile Include="Graphs\GraphGeneratorTests.cs" />
+    <Compile Include="MemoryCellFragment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

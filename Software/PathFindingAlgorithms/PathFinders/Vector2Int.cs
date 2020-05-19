@@ -5,6 +5,8 @@
         public int X { get; set; }
         public int Y { get; set; }
 
+        public static Vector2Int Zero { get; } = new Vector2Int(0, 0);
+
         public bool IsValid { get; set; }
 
         public Vector2Int(int x, int y)

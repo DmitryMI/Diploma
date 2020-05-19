@@ -76,6 +76,7 @@
     <Compile Include="ICellMap.cs" />
     <Compile Include="ICellPathFinder.cs" />
     <Compile Include="Algorithms\LeeAlgorithm.cs" />
+    <Compile Include="IMutableCellMap.cs" />
     <Compile Include="Logging\ILogger.cs" />
     <Compile Include="Logging\LogManager.cs" />
     <Compile Include="NeighbourMode.cs" />
@@ -85,9 +86,6 @@
     <Compile Include="Graphs\SimpleTypes\MatrixWeightedGraph.cs" />
     <Compile Include="Graphs\SimpleTypes\WeightedGraphNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
