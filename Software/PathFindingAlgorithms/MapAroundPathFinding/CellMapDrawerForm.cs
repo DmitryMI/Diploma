@@ -127,7 +127,10 @@ namespace MapAroundPathFinding
 
             foreach (var type in types)
             {
-                AlgorithmSelectorBox.Items.Add(new PathFinderSelectorItem(type));
+                if (type.GetConstructors().Any(c => c.GetParameters().Length == 0))
+                {
+                    AlgorithmSelectorBox.Items.Add(new PathFinderSelectorItem(type));
+                }
             }
 
             AlgorithmSelectorBox.SelectedIndex = 0;

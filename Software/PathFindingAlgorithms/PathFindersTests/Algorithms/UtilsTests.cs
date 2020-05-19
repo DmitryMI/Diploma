@@ -90,8 +90,8 @@ namespace PathFinders.Algorithms.Tests
 
         private void TestSingleLesser()
         {
-            List<int> source = new List<int>() { 6};
-            List<int> correct = new List<int>() { 7, 6 };
+            List<int> source = new List<int>() {6};
+            List<int> correct = new List<int>() {7, 6};
             int value = 7;
             TestLists(source, correct, value, "SingleLesserTest");
         }

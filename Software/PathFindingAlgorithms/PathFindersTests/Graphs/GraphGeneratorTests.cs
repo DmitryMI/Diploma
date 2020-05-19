@@ -132,7 +132,7 @@ namespace PathFinders.Graphs.Tests
         {
             int width = _rnd.Next(10, 20);
             int height = _rnd.Next(10, 20);
-            NeighbourMode neighbourMode = NeighbourMode.SideOnly;
+            NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals;
             MemoryCellFragment cellFragment = new MemoryCellFragment(width, height);
             FillRandom(cellFragment);
             WeightedGraph<double> weightedGraph = GraphGenerator.GetWeightedGraph(cellFragment, neighbourMode);
