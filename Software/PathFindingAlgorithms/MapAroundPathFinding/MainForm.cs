@@ -30,6 +30,8 @@ namespace MapAroundPathFinding
         private Map _mapAroundMap;
         private BoundingRectangle _initialRectangle;
 
+        private bool _ctrlIsDown;
+
         public MainForm()
         {
             InitializeComponent();
@@ -451,15 +453,22 @@ namespace MapAroundPathFinding
             switch (me.Button)
             {
                 case MouseButtons.Right:
-                {
-                    OnRightClick(mousePoint);
-                    break;
-                }
+                    {
+                        if (!_ctrlIsDown)
+                        {
+                            OnRightClick(mousePoint);
+                        }
+                        else
+                        {
+                            OnMiddleClick(mousePoint);
+                        }
+                        break;
+                    }
                 case MouseButtons.Middle:
-                {
-                    OnMiddleClick(mousePoint);
-                    break;
-                }
+                    {
+                        OnMiddleClick(mousePoint);
+                        break;
+                    }
             }
         }
 
@@ -700,6 +709,32 @@ namespace MapAroundPathFinding
         {
             BitmapDrawerForm drawerForm = CreateForm<BitmapDrawerForm>();
             ShowBitmapDrawer(drawerForm, bmp);
+        }
+
+        private void MapAroundControl_KeyUp(object sender, KeyEventArgs e)
+        {
+            
+        }
+
+        private void MapAroundControl_KeyDown(object sender, KeyEventArgs e)
+        {
+           
+        }
+
+        private void MainForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.ControlKey)
+            {
+                _ctrlIsDown = false;
+            }
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.ControlKey)
+            {
+                _ctrlIsDown = true;
+            }
         }
     }
 }

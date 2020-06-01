@@ -34,8 +34,8 @@
             this.LayerSettings = new System.Windows.Forms.Button();
             this.GetCellMapButton = new System.Windows.Forms.Button();
             this.HpaTestingButton = new System.Windows.Forms.Button();
-            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
             this.TestUserYButton = new System.Windows.Forms.Button();
+            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
             this.MainStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.SuspendLayout();
@@ -97,6 +97,16 @@
             this.HpaTestingButton.UseVisualStyleBackColor = true;
             this.HpaTestingButton.Click += new System.EventHandler(this.HpaTestingButton_Click);
             // 
+            // TestUserYButton
+            // 
+            this.TestUserYButton.Location = new System.Drawing.Point(1017, 128);
+            this.TestUserYButton.Name = "TestUserYButton";
+            this.TestUserYButton.Size = new System.Drawing.Size(152, 23);
+            this.TestUserYButton.TabIndex = 7;
+            this.TestUserYButton.Text = "Y TEST";
+            this.TestUserYButton.UseVisualStyleBackColor = true;
+            this.TestUserYButton.Click += new System.EventHandler(this.TestUserYButton_Click);
+            // 
             // MapAroundControl
             // 
             this.MapAroundControl.AlignmentWhileZooming = true;
@@ -120,16 +130,6 @@
             this.MapAroundControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseDown);
             this.MapAroundControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseUp);
             // 
-            // TestUserYButton
-            // 
-            this.TestUserYButton.Location = new System.Drawing.Point(1017, 128);
-            this.TestUserYButton.Name = "TestUserYButton";
-            this.TestUserYButton.Size = new System.Drawing.Size(152, 23);
-            this.TestUserYButton.TabIndex = 7;
-            this.TestUserYButton.Text = "Y TEST";
-            this.TestUserYButton.UseVisualStyleBackColor = true;
-            this.TestUserYButton.Click += new System.EventHandler(this.TestUserYButton_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -142,9 +142,12 @@
             this.Controls.Add(this.MainStatusStrip);
             this.Controls.Add(this.OpenMapButton);
             this.Controls.Add(this.MapAroundControl);
+            this.KeyPreview = true;
             this.Name = "MainForm";
             this.Text = "Поиск кратчайшего безопасного пути";
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
             this.MainStatusStrip.ResumeLayout(false);
             this.MainStatusStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).EndInit();
