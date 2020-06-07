@@ -252,7 +252,7 @@ namespace MapAroundPathFinding
         {
             _pathFeatureLayer = new FeatureLayer();
             _pathFeatureLayer.PointStyle.Color = Color.Green;
-            _pathFeatureLayer.PointStyle.Size = 10;
+            _pathFeatureLayer.PointStyle.Size = 20;
             _pathFeatureLayer.PointStyle.Symbol = '*';
             _pathFeatureLayer.Visible = true;
             _pathFeatureLayer.Alias = "Path";
@@ -392,7 +392,7 @@ namespace MapAroundPathFinding
         {
             foreach (var cell in path)
             {
-                ICoordinate coordinate = ProjectFromCellMap(cell);
+                ICoordinate coordinate = ProjectFromCellMap(cell + new Vector2Int(1, 0));
                 Feature pointFeature = new Feature(FeatureType.Point);
                 PointD point = new PointD(coordinate);
                 pointFeature.Point = point;
