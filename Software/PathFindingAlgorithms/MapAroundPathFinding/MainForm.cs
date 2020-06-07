@@ -210,7 +210,8 @@ namespace MapAroundPathFinding
         private MapAroundCellMap _cellMap;
         private ICellPathFinder _pathFinder;
         private Task _backgroundTask;
-        private FeatureLayer _pathFeatureLayer;
+        private FeatureLayer _safePathFeatureLayer;
+        private FeatureLayer _unsafePathFeatureLayer;
         private bool _pathFindingUiActive = true;
 
         private void SetUiActive(bool active)
@@ -250,18 +251,39 @@ namespace MapAroundPathFinding
 
         private void InitPathLayer()
         {
-            _pathFeatureLayer = new FeatureLayer();
-            _pathFeatureLayer.PointStyle.Color = Color.Green;
-            _pathFeatureLayer.PointStyle.Size = 20;
-            _pathFeatureLayer.PointStyle.Symbol = '*';
-            _pathFeatureLayer.Visible = true;
-            _pathFeatureLayer.Alias = "Path";
-            _mapAroundMap.AddLayer(_pathFeatureLayer);
+            _safePathFeatureLayer = new FeatureLayer();
+            _safePathFeatureLayer.PointStyle.Color = Color.Green;
+            _safePathFeatureLayer.PointStyle.Size = 20;
+            _safePathFeatureLayer.PointStyle.Symbol = '*';
+            _safePathFeatureLayer.Visible = true;
+            _safePathFeatureLayer.Alias = "SafePath";
+            _mapAroundMap.AddLayer(_safePathFeatureLayer);
+
+            _unsafePathFeatureLayer = new FeatureLayer();
+            _unsafePathFeatureLayer.PointStyle.Color = Color.Blue;
+            _unsafePathFeatureLayer.PointStyle.Size = 20;
+            _unsafePathFeatureLayer.PointStyle.Symbol = '*';
+            _unsafePathFeatureLayer.Visible = true;
+            _unsafePathFeatureLayer.Alias = "UnsafePath";
+            _mapAroundMap.AddLayer(_unsafePathFeatureLayer);
         }
 
         private void ClearPathLayer()
         {
-            _pathFeatureLayer.RemoveAllFeatures();
+            _safePathFeatureLayer.RemoveAllFeatures();
+            _unsafePathFeatureLayer.RemoveAllFeatures();
+        }
+
+        private void SetText(Control control, string text)
+        {
+            if(InvokeRequired)
+            {
+                BeginInvoke(new Action<Control, string>(SetText), control, text);
+            }
+            else
+            {
+                control.Text = text;
+            }
         }
 
         private Vector2Int ProjectToCellMap(ICoordinate coordinate)
@@ -336,11 +358,36 @@ namespace MapAroundPathFinding
             return form;
         }
 
+        private void FindPath(TextBox distancePrinter, FeatureLayer targetLayer)
+        {
+            Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
+            Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
+
+            var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+            //var path = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
+
+            if (path == null)
+            {
+                MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            else
+            {
+                //double distance = ProcessPathHaversine(path, targetLayer);                
+                //string text = distance.ToString("0.00") + " метров";
+                int distance = ProcessPathCells(path, targetLayer);
+                string text = distance.ToString() + " ячеек";
+                SetText(distancePrinter, text);
+            }
+        }
+
         private void GetPathJob()
         {
             try
             {
                 _pathFinder.ClearObstacles();
+                _pathFinder.RecalculateObstacles();
+                FindPath(DistanceBox, _unsafePathFeatureLayer);
+
                 foreach (var feature in _userRegionLayer.Features)
                 {
                     if (feature.FeatureType == FeatureType.Polygon)
@@ -352,23 +399,8 @@ namespace MapAroundPathFinding
                 }
 
                 _pathFinder.RecalculateObstacles();
-
-                Vector2Int startVector2Int = ProjectToCellMap(_startPoint);
-                Vector2Int stopVector2Int = ProjectToCellMap(_endPoint);
-
-                var path = _pathFinder.GetSmoothedPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
-                //var path = _pathFinder.GetPath(_cellMap, startVector2Int, stopVector2Int, NeighbourMode.SidesAndDiagonals);
-
-                if (path == null)
-                {
-                    MessageBox.Show("Путь не найден!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-                else
-                {
-                    DrawPath(path);
-                    //DrawPath(rawPath);
-                }
-                
+                Thread.Sleep(100);
+                FindPath(SafeDistanceBox, _safePathFeatureLayer);                
             }
             catch (OutOfMapBoundsException)
             {
@@ -388,21 +420,47 @@ namespace MapAroundPathFinding
             }
         }
 
-        private void DrawPath(IList<Vector2Int> path)
+        private double ProcessPathHaversine(IList<Vector2Int> path, FeatureLayer targetLayer)
         {
+            double distance = 0;
+            ICoordinate prevCoordinate = null;
             foreach (var cell in path)
             {
                 ICoordinate coordinate = ProjectFromCellMap(cell + new Vector2Int(1, 0));
+                
                 Feature pointFeature = new Feature(FeatureType.Point);
                 PointD point = new PointD(coordinate);
                 pointFeature.Point = point;
-                _pathFeatureLayer.AddFeature(pointFeature);
+                targetLayer.AddFeature(pointFeature);
+
+                if(prevCoordinate != null)
+                {
+                    distance += Haversine.GetDistance(coordinate.Y, coordinate.X, prevCoordinate.Y, prevCoordinate.X);
+                }
+                prevCoordinate = coordinate;
             }
             Debug.WriteLine("Path finding finished!");
             RedrawMap();
 
-            //CellMapDrawerForm drawerForm = CreateForm<CellMapDrawerForm>();
-            //ShowCellMapDrawerForm(drawerForm, _hpaStar.LayeredCellMap, rawPath);
+            return distance;
+        }
+
+        private int ProcessPathCells(IList<Vector2Int> path, FeatureLayer targetLayer)
+        {
+            int distance = path.Count;            
+            foreach (var cell in path)
+            {
+                ICoordinate coordinate = ProjectFromCellMap(cell + new Vector2Int(1, 0));
+
+                Feature pointFeature = new Feature(FeatureType.Point);
+                PointD point = new PointD(coordinate);
+                pointFeature.Point = point;
+                targetLayer.AddFeature(pointFeature);                
+            }
+            Debug.WriteLine("Path finding finished!");
+            RedrawMap();
+
+            return distance;
         }
 
         private void RedrawMap()

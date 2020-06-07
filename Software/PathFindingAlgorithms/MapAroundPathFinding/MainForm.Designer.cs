@@ -36,6 +36,10 @@
             this.HpaTestingButton = new System.Windows.Forms.Button();
             this.TestUserYButton = new System.Windows.Forms.Button();
             this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
+            this.label1 = new System.Windows.Forms.Label();
+            this.DistanceBox = new System.Windows.Forms.TextBox();
+            this.SafeDistanceBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.MainStatusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.SuspendLayout();
@@ -130,11 +134,47 @@
             this.MapAroundControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseDown);
             this.MapAroundControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseUp);
             // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(1017, 154);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(152, 31);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Длина пути без учета опасных участков:";
+            // 
+            // DistanceBox
+            // 
+            this.DistanceBox.Location = new System.Drawing.Point(1020, 188);
+            this.DistanceBox.Name = "DistanceBox";
+            this.DistanceBox.ReadOnly = true;
+            this.DistanceBox.Size = new System.Drawing.Size(149, 20);
+            this.DistanceBox.TabIndex = 9;
+            // 
+            // SafeDistanceBox
+            // 
+            this.SafeDistanceBox.Location = new System.Drawing.Point(1020, 255);
+            this.SafeDistanceBox.Name = "SafeDistanceBox";
+            this.SafeDistanceBox.ReadOnly = true;
+            this.SafeDistanceBox.Size = new System.Drawing.Size(149, 20);
+            this.SafeDistanceBox.TabIndex = 11;
+            // 
+            // label2
+            // 
+            this.label2.Location = new System.Drawing.Point(1017, 221);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(152, 31);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Длина пути с учетом опасных участков:";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1181, 589);
+            this.Controls.Add(this.SafeDistanceBox);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.DistanceBox);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.TestUserYButton);
             this.Controls.Add(this.HpaTestingButton);
             this.Controls.Add(this.GetCellMapButton);
@@ -166,5 +206,9 @@
         private System.Windows.Forms.Button GetCellMapButton;
         private System.Windows.Forms.Button HpaTestingButton;
         private System.Windows.Forms.Button TestUserYButton;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox DistanceBox;
+        private System.Windows.Forms.TextBox SafeDistanceBox;
+        private System.Windows.Forms.Label label2;
     }
 }

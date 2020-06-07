@@ -72,6 +72,7 @@
     <Compile Include="Graphs\IWeightedGraphNode.cs" />
     <Compile Include="Graphs\SimpleTypes\WeightedGraph.cs" />
     <Compile Include="Graphs\SimpleTypes\WeightedGraphNodeEnumerator.cs" />
+    <Compile Include="Haversine.cs" />
     <Compile Include="ICellFragment.cs" />
     <Compile Include="ICellMap.cs" />
     <Compile Include="ICellPathFinder.cs" />
