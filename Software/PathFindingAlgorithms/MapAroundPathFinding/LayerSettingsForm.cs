@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,13 @@ namespace MapAroundPathFinding
             public bool IsChecked
             {
                 get => Layer.Visible;
-                set => Layer.Visible = value;
+                set => SetChecked(value);
+            }
+
+            private void SetChecked(bool val)
+            {
+                Layer.Visible = val;
+                Debug.WriteLine($"Layer {Layer.GetType()}({Layer.Alias}) visibility changed to {Layer.Visible}");
             }
 
             public LayerCheckItem(LayerBase layerBase)

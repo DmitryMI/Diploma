@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MapAroundPathFinding.HpaStarTesting;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
 using PathFinders.Algorithms.HpaStar;
@@ -23,27 +24,39 @@ namespace MapAroundPathFinding
         private Brush _mapBrush = new SolidBrush(Color.Black);
         private int _scale;
 
+        private HpaStarAlgorithm _hpaStar;
+        private List<ICellFragment> _obstacles = new List<ICellFragment>();
+
 
         private void CreateMap()
         {
             string text = File.ReadAllText("complex.cmap");
-
             
             MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
             
             _cellMap = StringMapBuilder.FromText(stream, 'S', 'E', 'X', '.');
+
+            _hpaStar = new HpaStarAlgorithm();
+            _hpaStar.Initialize(_cellMap, 8);
         }
 
         private void DrawMap()
         {
             //pictureBox1.Image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             int scale = (int)Math.Ceiling((double)pictureBox1.Width / _cellMap.Width);
-            
-            for (int x = 0; x < _cellMap.Width; x++)
+
+            LayeredCellMap layeredCellMap = new LayeredCellMap(_cellMap);
+
+            foreach (var obstacle in _obstacles)
             {
-                for (int y = 0; y < _cellMap.Height; y++)
+                layeredCellMap.AddFragment(obstacle);
+            }
+            
+            for (int x = 0; x < layeredCellMap.Width; x++)
+            {
+                for (int y = 0; y < layeredCellMap.Height; y++)
                 {
-                    if (_cellMap[x, y] == false)
+                    if (!layeredCellMap.IsPassable(x, y))
                     {
                         int xScaled = x * scale;
                         int yScaled = y * scale;
@@ -70,6 +83,7 @@ namespace MapAroundPathFinding
 
         private void StartButton_Click(object sender, EventArgs e)
         {
+            _graphics.Clear(Color.White);
             DrawMap();
             LaunchHpaStar();
         }
@@ -105,7 +119,7 @@ namespace MapAroundPathFinding
             
         }
 
-        private void DrawLevelOneConnections(List<HierarchicalGraphNode> nodes)
+        private void DrawLevelOneConnections(List<HierarchicalGraphNode> nodes, bool printWeights)
         {
             foreach (var node in nodes)
             {
@@ -120,12 +134,16 @@ namespace MapAroundPathFinding
                     int connectionYScaled = connection.Position.Y * _scale + _scale / 2;
                     _graphics.DrawLine(new Pen(Color.Green, 3), startX, startY, connectionXScaled, connectionYScaled);
 
-                    int middleX = (connectionXScaled + startX) / 2;
-                    int middleY = (connectionYScaled + startY) / 2;
-                    double weight = node.GetWeight((IWeightedGraphNode<double>) connection);
-                    Font drawFont = new Font("Arial", 5);
+                    if (printWeights)
+                    {
+                        int middleX = (connectionXScaled + startX) / 2;
+                        int middleY = (connectionYScaled + startY) / 2;
+                        double weight = node.GetWeight((IWeightedGraphNode<double>) connection);
+                        Font drawFont = new Font("Arial", 5);
 
-                    _graphics.DrawString(weight.ToString("0.0"), drawFont, new SolidBrush(Color.Black), middleX, middleY);
+                        _graphics.DrawString(weight.ToString("0.0"), drawFont, new SolidBrush(Color.Black), middleX,
+                            middleY);
+                    }
                 }
             }
         }
@@ -165,24 +183,24 @@ namespace MapAroundPathFinding
 
         private void LaunchHpaStar()
         {
-            int clusterSize = 8;
-            var hierarchyGraph = HierarchicalMapGenerator.GenerateMap(_cellMap, NeighbourMode.SideOnly, clusterSize);
+            _hpaStar.ClearObstacles();
+            foreach (var obstacle in _obstacles)
+            {
+                _hpaStar.AddObstacle(obstacle);
+            }
+            _hpaStar.RecalculateObstacles();
 
             DrawCellBorders();
 
-            DrawClusters(hierarchyGraph.ZeroLevelClusters);
+            DrawClusters(_hpaStar.HierarchicalGraph.ZeroLevelClusters);
             
-            DrawLevelOneNodes(hierarchyGraph.Nodes);
+            DrawLevelOneNodes(_hpaStar.HierarchicalGraph.Nodes);
 
-            DrawLevelOneConnections(hierarchyGraph.Nodes);
+            DrawLevelOneConnections(_hpaStar.HierarchicalGraph.Nodes, false);
             
+            _hpaStar.OnCellViewedEvent += OnCellViewed;
 
-            HpaStarAlgorithm hpa = new HpaStarAlgorithm();
-            hpa.HierarchicalGraph = hierarchyGraph;
-            hpa.ClusterSizeZero = clusterSize;
-            hpa.OnCellViewedEvent += OnCellViewed;
-
-            IList<Vector2Int> path = hpa.GetPath(_cellMap, _cellMap.DefaultStart, _cellMap.DefaultStop,
+            IList<Vector2Int> path = _hpaStar.GetPath(_cellMap, _cellMap.DefaultStart, _cellMap.DefaultStop,
                 NeighbourMode.SidesAndDiagonals);
 
             DrawPath(path);
@@ -213,6 +231,32 @@ namespace MapAroundPathFinding
             int yScaled = y * _scale;
             _graphics.FillEllipse(new SolidBrush(Color.DarkGreen), xScaled, yScaled, _scale / 2, _scale / 2);
             //Thread.Sleep(100);
+        }
+
+        private void AddObstacle_Click(object sender, EventArgs e)
+        {
+            _obstacles.Clear();
+            CellFragment fragment = new CellFragment(3, 3, new Vector2Int(15, 6));
+
+            for (int i = 0; i < fragment.Width; i++)
+            {
+                for (int j = 0; j < fragment.Height; j++)
+                {
+                    fragment[i, j] = false;
+                }
+            }
+
+            _obstacles.Add(fragment);
+
+            DrawMap();
+        }
+
+        private void RemoveObstaclesButton_Click(object sender, EventArgs e)
+        {
+            _obstacles.Clear();
+            
+            _graphics.Clear(Color.White);
+            DrawMap();
         }
     }
 }

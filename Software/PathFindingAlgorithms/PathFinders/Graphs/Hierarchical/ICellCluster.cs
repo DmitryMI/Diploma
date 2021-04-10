@@ -1,8 +1,7 @@
 ﻿namespace PathFinders.Graphs.Hierarchical
 {
-    public interface ICellCluster : ICellMap
+    public interface ICellCluster : ICellFragment
     {
-        Vector2Int LeftBottom { get; }
         ICellMap Map { get; }
     }
 }

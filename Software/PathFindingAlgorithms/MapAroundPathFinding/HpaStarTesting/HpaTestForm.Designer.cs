@@ -30,6 +30,8 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.StartButton = new System.Windows.Forms.Button();
+            this.AddObstacle = new System.Windows.Forms.Button();
+            this.RemoveObstaclesButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -52,11 +54,33 @@
             this.StartButton.UseVisualStyleBackColor = true;
             this.StartButton.Click += new System.EventHandler(this.StartButton_Click);
             // 
+            // AddObstacle
+            // 
+            this.AddObstacle.Location = new System.Drawing.Point(518, 41);
+            this.AddObstacle.Name = "AddObstacle";
+            this.AddObstacle.Size = new System.Drawing.Size(100, 43);
+            this.AddObstacle.TabIndex = 2;
+            this.AddObstacle.Text = "Добавить препятствие";
+            this.AddObstacle.UseVisualStyleBackColor = true;
+            this.AddObstacle.Click += new System.EventHandler(this.AddObstacle_Click);
+            // 
+            // RemoveObstaclesButton
+            // 
+            this.RemoveObstaclesButton.Location = new System.Drawing.Point(518, 90);
+            this.RemoveObstaclesButton.Name = "RemoveObstaclesButton";
+            this.RemoveObstaclesButton.Size = new System.Drawing.Size(100, 43);
+            this.RemoveObstaclesButton.TabIndex = 3;
+            this.RemoveObstaclesButton.Text = "Убрать препятствия";
+            this.RemoveObstaclesButton.UseVisualStyleBackColor = true;
+            this.RemoveObstaclesButton.Click += new System.EventHandler(this.RemoveObstaclesButton_Click);
+            // 
             // HpaTestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(622, 527);
+            this.Controls.Add(this.RemoveObstaclesButton);
+            this.Controls.Add(this.AddObstacle);
             this.Controls.Add(this.StartButton);
             this.Controls.Add(this.pictureBox1);
             this.Name = "HpaTestForm";
@@ -71,5 +95,7 @@
 
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button StartButton;
+        private System.Windows.Forms.Button AddObstacle;
+        private System.Windows.Forms.Button RemoveObstaclesButton;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +14,7 @@ using System.Windows.Forms;
 using MapAroundPathFinding.PathFinding;
 using PathFinders;
 using PathFinders.Algorithms;
+using PathFinders.Algorithms.PathSmoothing;
 
 namespace MapAroundPathFinding
 {
@@ -26,20 +28,33 @@ namespace MapAroundPathFinding
         private int DefaultWidth = 1000;
         private int DefaultHeight = 550;
 
-        private MapAroundCellMap _cellMap;
+        private ICellMap _cellMap;
         private Graphics _pictureBoxGraphics;
         private SolidBrush _reportBrush = new SolidBrush(Color.Green);
         private SolidBrush _pathBrush = new SolidBrush(Color.Blue);
         private int _stepsEstimate;
 
         private int _scale;
+        private Hashtable _viewedCellsTable = new Hashtable();
 
         private ICellPathFinder _currentPathFinder;
 
-        public CellMapDrawerForm(MapAroundCellMap cellMap)
+        private IList<Vector2Int> _userPath;
+
+        public CellMapDrawerForm(ICellMap cellMap)
         {
             InitializeComponent();
 
+            ShowMap(cellMap);
+        }
+
+        public CellMapDrawerForm()
+        {
+            InitializeComponent();
+        }
+
+        public void ShowMap(ICellMap cellMap)
+        {
             _cellMap = cellMap;
             _stage = 0;
 
@@ -48,11 +63,30 @@ namespace MapAroundPathFinding
             _pictureBoxGraphics = PictureBox.CreateGraphics();
 
             AddAlgorithms();
+
+            Show();
+        }
+
+        public void ShowMap(ICellMap cellMap, IList<Vector2Int> path)
+        {
+            _cellMap = cellMap;
+            _stage = 0;
+
+            DrawCellMatrix();
+
+            _pictureBoxGraphics = PictureBox.CreateGraphics();
+
+            AddAlgorithms();
+
+            _userPath = path;
+
+            Show();
         }
 
         private class PathFinderSelectorItem
         {
             public Type PathFinderType { get; set; }
+
             public override string ToString()
             {
                 return PathFinderType.Name;
@@ -74,13 +108,13 @@ namespace MapAroundPathFinding
                     Thread.Sleep(0);
                 }
 
-                return (ICellPathFinder)EndInvoke(result);
+                return (ICellPathFinder) EndInvoke(result);
             }
             else
             {
-                PathFinderSelectorItem item = (PathFinderSelectorItem)AlgorithmSelectorBox.SelectedItem;
+                PathFinderSelectorItem item = (PathFinderSelectorItem) AlgorithmSelectorBox.SelectedItem;
                 Type type = item.PathFinderType;
-                return (ICellPathFinder)Activator.CreateInstance(type);
+                return (ICellPathFinder) Activator.CreateInstance(type);
             }
         }
 
@@ -93,7 +127,10 @@ namespace MapAroundPathFinding
 
             foreach (var type in types)
             {
-                AlgorithmSelectorBox.Items.Add(new PathFinderSelectorItem(type));
+                if (type.GetConstructors().Any(c => c.GetParameters().Length == 0))
+                {
+                    AlgorithmSelectorBox.Items.Add(new PathFinderSelectorItem(type));
+                }
             }
 
             AlgorithmSelectorBox.SelectedIndex = 0;
@@ -116,8 +153,8 @@ namespace MapAroundPathFinding
         {
             int mapWidth = _cellMap.Width;
             int mapHeight = _cellMap.Height;
-           
-            int scale = (int)Math.Ceiling((double)DefaultWidth / mapWidth);
+
+            int scale = (int) Math.Ceiling((double) DefaultWidth / mapWidth);
 
             if (scale < 1)
             {
@@ -125,9 +162,9 @@ namespace MapAroundPathFinding
             }
 
             ResizeWindow(mapWidth * scale, mapHeight * scale);
-            
 
-            Bitmap bitmap = _cellMap.ToBitmap(scale);
+
+            Bitmap bitmap = CellMapToBitmap.GetBitmap(_cellMap, scale);
             _scale = scale;
             RenderBitmap(bitmap);
         }
@@ -135,12 +172,13 @@ namespace MapAroundPathFinding
         private void RenderBitmap(Bitmap bitmap)
         {
             PictureBox.Image = bitmap;
+            SetMapSizeLabel();
         }
 
         private Vector2Int SetPoint(Point mousePosition, Color color)
         {
-            int x = (int)Math.Round((double)mousePosition.X / _scale);
-            int y = (int)Math.Round((double)mousePosition.Y / _scale);
+            int x = (int) Math.Round((double) mousePosition.X / _scale);
+            int y = (int) Math.Round((double) mousePosition.Y / _scale);
             Vector2Int position = new Vector2Int(x, y);
             if (_cellMap.Width <= position.X)
             {
@@ -151,7 +189,7 @@ namespace MapAroundPathFinding
             {
                 position.Y = _cellMap.Height - 1;
             }
-            
+
             Brush brush = new SolidBrush(color);
             int scaleShift = _scale;
             int pointWidth = _scale;
@@ -165,7 +203,9 @@ namespace MapAroundPathFinding
             {
                 pointHeight = 3;
             }
-            _pictureBoxGraphics.FillEllipse(brush, position.X * _scale - scaleShift + 1, position.Y * _scale - scaleShift + 1, pointWidth, pointHeight);
+
+            _pictureBoxGraphics.FillEllipse(brush, position.X * _scale - scaleShift + 1,
+                position.Y * _scale - scaleShift + 1, pointWidth, pointHeight);
 
             return position;
         }
@@ -212,6 +252,7 @@ namespace MapAroundPathFinding
                 {
                     pointHeight = minPointSize;
                 }
+
                 Brush brush = new SolidBrush(color);
                 _pictureBoxGraphics.FillEllipse(brush, x, y, pointWidth, pointHeight);
             }
@@ -225,12 +266,17 @@ namespace MapAroundPathFinding
             }
             else
             {
-                _pictureBoxGraphics.DrawEllipse(new Pen(Color.LawnGreen), x * _scale - _scale + 1, y * _scale - _scale + 1, 3, 3);
+                _pictureBoxGraphics.DrawEllipse(new Pen(Color.LawnGreen), x * _scale - _scale + 1,
+                    y * _scale - _scale + 1, 3, 3);
             }
         }
 
         private void DrawPath(IList<Vector2Int> path)
         {
+            if (path == null)
+            {
+                return;
+            }
             // Raw path drawing
             foreach (var cell in path)
             {
@@ -250,6 +296,14 @@ namespace MapAroundPathFinding
             Debug.WriteLine($"Smoothed path length: {path.Count}");
         }
 
+        public void DrawUserPath(IList<Vector2Int> path)
+        {
+            foreach (var cell in path)
+            {
+                DrawPathPoint(cell, Color.Blue, 1);
+            }
+        }
+
         private void StartPathFinder()
         {
             try
@@ -258,6 +312,9 @@ namespace MapAroundPathFinding
 
                 ICellPathFinder pathFinder = _currentPathFinder;
                 pathFinder.OnCellViewedEvent += OnCellViewed;
+
+                _viewedCellsTable.Add(pathFinder, 0);
+
                 IList<Vector2Int> path =
                     pathFinder.GetPath(_cellMap, _startPoint, _stopPoint, NeighbourMode.SidesAndDiagonals);
                 if (path == null)
@@ -267,12 +324,14 @@ namespace MapAroundPathFinding
                 else
                 {
                     DrawPath(path);
-                    
                 }
+
+                SetViewedCellsCount((int) _viewedCellsTable[pathFinder]);
+                _viewedCellsTable.Remove(pathFinder);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Debug.WriteLine(ex.StackTrace);
                 throw;
             }
@@ -288,23 +347,31 @@ namespace MapAroundPathFinding
             }
             else
             {
-                double factor = (double)d / _stepsEstimate;
+                double factor = (double) d / _stepsEstimate;
                 if (factor > 1)
                     factor = 1;
-                byte green = (byte)(255 * (factor));
-                byte red = (byte)(255 * (1 - factor));
+                byte green = (byte) (255 * (factor));
+                byte red = (byte) (255 * (1 - factor));
                 Color color = Color.FromArgb(red, green, 0);
                 _reportBrush.Color = color;
                 int scaleHalf = _scale / 2;
                 int drawX = x * _scale - _scale + 1;
                 int drawY = y * _scale - _scale + 1;
                 _pictureBoxGraphics.FillRectangle(_reportBrush, drawX, drawY, _scale, _scale);
+
+                object cellsCountObj = _viewedCellsTable[sender];
+                if (cellsCountObj != null)
+                {
+                    int cellsCount = (int) _viewedCellsTable[sender];
+                    cellsCount++;
+                    _viewedCellsTable[sender] = cellsCount;
+                }
             }
         }
 
         private void PictureBox_Click(object sender, EventArgs e)
         {
-            MouseEventArgs me = (MouseEventArgs)e;
+            MouseEventArgs me = (MouseEventArgs) e;
             Point coordinates = me.Location;
             OnUserClick(coordinates);
         }
@@ -349,14 +416,44 @@ namespace MapAroundPathFinding
             }
         }
 
+        private void SetViewedCellsCount(int count)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<int>(SetViewedCellsCount), count);
+            }
+            else
+            {
+                ViewedCellsLabel.Text = count.ToString();
+            }
+        }
+
+        private void SetMapSizeLabel()
+        {
+            int width = _cellMap.Width;
+            int height = _cellMap.Height;
+            SetMapSizeLabel(width, height);
+        }
+
+        private void SetMapSizeLabel(int width, int height)
+        {
+            RectSizeLabel.Text = $"{width} x {height}";
+        }
+
         private void FindPathButton_Click(object sender, EventArgs e)
         {
+            DrawPath(_userPath);
             FindPath();
         }
 
         private void AlgorithmSelectorBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             _currentPathFinder = InstantiatePathFinder();
+        }
+
+        private void DrawUserPathButton_Click(object sender, EventArgs e)
+        {
+            DrawPath(_userPath);
         }
     }
 }

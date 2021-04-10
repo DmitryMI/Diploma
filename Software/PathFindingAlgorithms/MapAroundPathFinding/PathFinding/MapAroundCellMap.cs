@@ -29,6 +29,11 @@ namespace MapAroundPathFinding.PathFinding
         {
             _mapAroundMap = mapAroundMap;
             _obstacles = new List<Polygon>();
+            SetBoundaries(mapBoundaries, cellWidth, cellHeight);
+        }
+
+        public void SetBoundaries(BoundingRectangle mapBoundaries, double cellWidth, double cellHeight)
+        {
             _boundingRectangle = mapBoundaries;
 
             _cellWidth = cellWidth;
@@ -68,10 +73,10 @@ namespace MapAroundPathFinding.PathFinding
             Vector2Int firstPoint = default;
             for (int i = 0; i < contour.CoordinateCount; i++)
             {
-                double xShifted = contour.Vertices[i].X - _boundingRectangle.MinX;
-                double yShifted = contour.Vertices[i].Y - _boundingRectangle.MinY;
-                int xInt = (int) Math.Round(xShifted / _cellWidth);
-                int yInt = (int) Math.Round(yShifted / _cellHeight);
+                double xShifted = contour.Vertices[i].X - BoundingRectangle.MinX;
+                double yShifted = contour.Vertices[i].Y - BoundingRectangle.MinY;
+                int xInt = (int) Math.Round(xShifted / CellWidth);
+                int yInt = (int) Math.Round(yShifted / CellHeight);
 
                 Vector2Int point = new Vector2Int(xInt, yInt);
 
@@ -108,7 +113,7 @@ namespace MapAroundPathFinding.PathFinding
             foreach (var polygonFeature in layer.Polygons)
             {
                 var bounds = polygonFeature.BoundingRectangle;
-                if (_boundingRectangle.ContainsRectangle(bounds))
+                if (BoundingRectangle.ContainsRectangle(bounds))
                 {
                     _obstacles.Add(polygonFeature.Polygon);
                     RegisterObstacle(polygonFeature.Polygon);
@@ -124,7 +129,6 @@ namespace MapAroundPathFinding.PathFinding
         public bool IsInBounds(int x, int y)
         {
             return x >= 0 && y >= 0 && x < Width && y < Height;
-            //return _mapCells[x, y];
         }
 
         public Bitmap ToBitmap()
@@ -132,51 +136,18 @@ namespace MapAroundPathFinding.PathFinding
             return ToBitmap(1);
         }
 
-        private void DrawScaledPixel(Bitmap bmp, Color color, int x, int y, int scale)
-        {
-            double scaleHalf = (double)scale / 2;
-            int xScaled = x * scale - (int)Math.Round(scaleHalf);
-            int yScaled = y * scale - (int)Math.Round(scaleHalf);
-
-            int borderMin = -(int) Math.Round(scaleHalf);
-            int borderMax = (int)Math.Round(scaleHalf);
-
-            for (int i = borderMin; i <= borderMax; i++)
-            {
-                int drawX = xScaled + i;
-                if (drawX < 0 || drawX >= bmp.Width)
-                {
-                    continue;
-                }
-                for (int j = -borderMax; j <= borderMax; j++)
-                {
-                    int drawY = yScaled + j;
-                    if (drawY < 0 || drawY >= bmp.Height)
-                        continue;
-                    bmp.SetPixel(drawX, drawY, color);
-                }
-            }
-        }
-
         public Bitmap ToBitmap(int pixelScale)
         {
-            Bitmap bitmap = new Bitmap(Width * pixelScale, Height * pixelScale);
-
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y= 0; y < Height; y++)
-                {
-                    if (!_mapCells[x, y])
-                    {
-                        DrawScaledPixel(bitmap, Color.Black, x, y, pixelScale);
-                    }
-                }
-            }
-
-            return bitmap;
+            return CellMapToBitmap.GetBitmap(this, pixelScale);
         }
 
         public int Width => _mapCells.GetLength(0);
         public int Height => _mapCells.GetLength(1);
+
+        public double CellWidth => _cellWidth;
+
+        public double CellHeight => _cellHeight;
+
+        public BoundingRectangle BoundingRectangle => _boundingRectangle;
     }
 }

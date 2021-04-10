@@ -12,6 +12,8 @@ namespace PathFinders.Graphs.Hierarchical.SimpleTypes
         private List<IWeightedGraphNode<double>> _transitionNodes = new List<IWeightedGraphNode<double>>();
         private IList<Vector2Int>[,] _pathMatrix;
 
+        public Vector2Int ClusterIndex { get; set; }
+
         public Vector2Int LeftBottom { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
@@ -30,6 +32,11 @@ namespace PathFinders.Graphs.Hierarchical.SimpleTypes
             }
 
             return true;
+        }
+
+        public CellCluster(Vector2Int clusterIndex)
+        {
+            ClusterIndex = clusterIndex;
         }
 
 

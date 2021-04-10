@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using PathFinders.Algorithms.HpaStar;
+using PathFinders.Algorithms.PathSmoothing;
 using PathFinders.Graphs;
 using PathFinders.Graphs.SimpleTypes;
 
@@ -8,6 +10,8 @@ namespace PathFinders.Algorithms
     public class BestFirstSearch : ICellPathFinder, IGraphPathFinder, IComparer<IGraphNode>
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
+
+        private LayeredCellMap _layeredCellMap;
 
         private struct GraphData
         { 
@@ -19,6 +23,10 @@ namespace PathFinders.Algorithms
 
         private T GetData<T>(IGraphNode node)
         {
+            if (node == null)
+            {
+                return default(T);
+            }
             return (T) node.Data;
         }
 
@@ -66,7 +74,7 @@ namespace PathFinders.Algorithms
                 IGraphNode currentNode = openNodes[0];
                 openNodes.RemoveAt(0);
 
-                if (IsClosed(currentNode))
+                if (currentNode == null || IsClosed(currentNode))
                 {
                     //Console.WriteLine("Processing closed node!");
                     continue;
@@ -110,8 +118,13 @@ namespace PathFinders.Algorithms
             return path;
         }
 
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        public IList<Vector2Int> GetPath(ICellMap mapBase, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
+            if (_layeredCellMap == null)
+            {
+                _layeredCellMap = new LayeredCellMap(mapBase);
+            }
+
             bool StartNodeFilter(IWeightedGraphNode<double> node)
             {
                 return node != null && node.Position == start;
@@ -122,7 +135,7 @@ namespace PathFinders.Algorithms
                 return node != null && node.Position == stop;
             }
 
-            IWeightedGraph<double> graph = GraphGenerator.GetWeightedGraph(map, neighbourMode);
+            IWeightedGraph<double> graph = GraphGenerator.GetWeightedGraph(_layeredCellMap, neighbourMode);
             var nodes = graph.GetWeightedGraphNodes();
             IWeightedGraphNode<double>[] keyNodes = Utils.GetItemsByFilters(nodes, StartNodeFilter, StopNodeFilter);
             var startNode = keyNodes[0];
@@ -136,6 +149,10 @@ namespace PathFinders.Algorithms
             }
 
             var nodePath = GetPath(graph, startNode, stopNode);
+            if (nodePath == null)
+            {
+                return null;
+            }
             List<Vector2Int> path = new List<Vector2Int>(nodePath.Count);
             foreach (var node in nodePath)
             {
@@ -143,6 +160,45 @@ namespace PathFinders.Algorithms
             }
 
             return path;
+        }
+
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            if (_layeredCellMap == null)
+            {
+                _layeredCellMap = new LayeredCellMap(map);
+            }
+
+            map = _layeredCellMap;
+
+            var rawPath = GetPath(map, start, stop, neighbourMode);
+            if (rawPath == null)
+            {
+                return null;
+            }
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(map, rawPath);
+            return path;
+        }
+
+        public void AddObstacle(ICellFragment cellCluster)
+        {
+            _layeredCellMap.AddFragment(cellCluster);
+        }
+
+        public void ClearObstacles()
+        {
+            _layeredCellMap.ClearLayers();
+        }
+
+        public void RecalculateObstacles(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
+        {
+            
+        }
+
+        public void Initialize(ICellMap mapBase)
+        {
+            _layeredCellMap = new LayeredCellMap(mapBase);
         }
 
         public int Compare(IGraphNode a, IGraphNode b)

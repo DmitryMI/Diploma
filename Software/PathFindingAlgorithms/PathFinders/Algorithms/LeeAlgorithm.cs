@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using PathFinders.Algorithms.HpaStar;
+using PathFinders.Algorithms.PathSmoothing;
 
 namespace PathFinders.Algorithms
 {
     public class LeeAlgorithm : ICellPathFinder
     {
         public event Action<object, int, int, int> OnCellViewedEvent;
+
+        private LayeredCellMap _layeredCellMap;
 
         private void UpdateCellSurroundings(ICellMap map, int[,] matrix, int x, int y, int d, NeighbourMode neighbourMode)
         {
@@ -58,13 +62,30 @@ namespace PathFinders.Algorithms
             public Vector2Int Stop { get; set; }
         }
 
-        public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
-            int[,] matrix = new int[map.Width,map.Height];
-
-            for (int i = 0; i < map.Width; i++)
+            var rawPath = GetPath(map, start, stop, neighbourMode);
+            if (rawPath == null)
             {
-                for (int j = 0; j < map.Height; j++)
+                return null;
+            }
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(map, rawPath);
+            return path;
+        }
+
+        public IList<Vector2Int> GetPath(ICellMap mapBase, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            if (_layeredCellMap == null)
+            {
+                _layeredCellMap = new LayeredCellMap(mapBase);
+            }
+
+            int[,] matrix = new int[_layeredCellMap.Width, _layeredCellMap.Height];
+
+            for (int i = 0; i < _layeredCellMap.Width; i++)
+            {
+                for (int j = 0; j < _layeredCellMap.Height; j++)
                 {
                     matrix[i, j] = -1;
                 }
@@ -80,14 +101,14 @@ namespace PathFinders.Algorithms
             {
                 goFurther = false;
 
-                for (int i = 0; i < map.Width; i++)
+                for (int i = 0; i < _layeredCellMap.Width; i++)
                 {
                     if (matrix[stop.X, stop.Y] != -1)
                     {
                         break;
                     }
 
-                    for (int j = 0; j < map.Height; j++)
+                    for (int j = 0; j < _layeredCellMap.Height; j++)
                     {
                         if (matrix[stop.X, stop.Y] != -1)
                         {
@@ -95,7 +116,7 @@ namespace PathFinders.Algorithms
                         }
                         if (matrix[i, j] == d)
                         {
-                            UpdateCellSurroundings(map, matrix, i, j, d + 1, neighbourMode);
+                            UpdateCellSurroundings(_layeredCellMap, matrix, i, j, d + 1, neighbourMode);
                             goFurther = true;
                         }
                     }
@@ -123,6 +144,26 @@ namespace PathFinders.Algorithms
             path.Reverse();
 
             return path;
+        }
+
+        public void AddObstacle(ICellFragment cellCluster)
+        {
+            _layeredCellMap.AddFragment(cellCluster);
+        }
+
+        public void ClearObstacles()
+        {
+            _layeredCellMap.ClearLayers();
+        }
+
+        public void RecalculateObstacles(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
+        {
+            
+        }
+
+        public void Initialize(ICellMap mapBase)
+        {
+            _layeredCellMap = new LayeredCellMap(mapBase);
         }
     }
 }

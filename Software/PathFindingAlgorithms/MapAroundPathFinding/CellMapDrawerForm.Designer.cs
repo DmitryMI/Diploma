@@ -31,7 +31,12 @@
             this.PictureBox = new System.Windows.Forms.PictureBox();
             this.FindPathButton = new System.Windows.Forms.Button();
             this.PreferencesPanel = new System.Windows.Forms.Panel();
+            this.label2 = new System.Windows.Forms.Label();
+            this.ViewedCellsLabel = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.RectSizeLabel = new System.Windows.Forms.Label();
             this.AlgorithmSelectorBox = new System.Windows.Forms.ComboBox();
+            this.DrawUserPathButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox)).BeginInit();
             this.PreferencesPanel.SuspendLayout();
             this.SuspendLayout();
@@ -58,12 +63,52 @@
             // 
             // PreferencesPanel
             // 
+            this.PreferencesPanel.Controls.Add(this.DrawUserPathButton);
+            this.PreferencesPanel.Controls.Add(this.label2);
+            this.PreferencesPanel.Controls.Add(this.ViewedCellsLabel);
+            this.PreferencesPanel.Controls.Add(this.label1);
+            this.PreferencesPanel.Controls.Add(this.RectSizeLabel);
             this.PreferencesPanel.Controls.Add(this.AlgorithmSelectorBox);
             this.PreferencesPanel.Controls.Add(this.FindPathButton);
             this.PreferencesPanel.Location = new System.Drawing.Point(1019, 12);
             this.PreferencesPanel.Name = "PreferencesPanel";
             this.PreferencesPanel.Size = new System.Drawing.Size(124, 240);
             this.PreferencesPanel.TabIndex = 2;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 166);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(116, 13);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "Рассмотренно ячеек:";
+            // 
+            // ViewedCellsLabel
+            // 
+            this.ViewedCellsLabel.Location = new System.Drawing.Point(6, 183);
+            this.ViewedCellsLabel.Name = "ViewedCellsLabel";
+            this.ViewedCellsLabel.Size = new System.Drawing.Size(111, 20);
+            this.ViewedCellsLabel.TabIndex = 5;
+            this.ViewedCellsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 203);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(76, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Размер окна:";
+            // 
+            // RectSizeLabel
+            // 
+            this.RectSizeLabel.Location = new System.Drawing.Point(6, 220);
+            this.RectSizeLabel.Name = "RectSizeLabel";
+            this.RectSizeLabel.Size = new System.Drawing.Size(111, 20);
+            this.RectSizeLabel.TabIndex = 3;
+            this.RectSizeLabel.Text = "0 x 0";
+            this.RectSizeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // AlgorithmSelectorBox
             // 
@@ -74,6 +119,16 @@
             this.AlgorithmSelectorBox.Size = new System.Drawing.Size(118, 21);
             this.AlgorithmSelectorBox.TabIndex = 2;
             this.AlgorithmSelectorBox.SelectedIndexChanged += new System.EventHandler(this.AlgorithmSelectorBox_SelectedIndexChanged);
+            // 
+            // DrawUserPathButton
+            // 
+            this.DrawUserPathButton.Location = new System.Drawing.Point(3, 59);
+            this.DrawUserPathButton.Name = "DrawUserPathButton";
+            this.DrawUserPathButton.Size = new System.Drawing.Size(118, 37);
+            this.DrawUserPathButton.TabIndex = 7;
+            this.DrawUserPathButton.Text = "Отобразить сохраненный путь";
+            this.DrawUserPathButton.UseVisualStyleBackColor = true;
+            this.DrawUserPathButton.Click += new System.EventHandler(this.DrawUserPathButton_Click);
             // 
             // CellMapDrawerForm
             // 
@@ -86,6 +141,7 @@
             this.Text = "CellMapDrawer";
             ((System.ComponentModel.ISupportInitialize)(this.PictureBox)).EndInit();
             this.PreferencesPanel.ResumeLayout(false);
+            this.PreferencesPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -96,5 +152,10 @@
         private System.Windows.Forms.Button FindPathButton;
         private System.Windows.Forms.Panel PreferencesPanel;
         private System.Windows.Forms.ComboBox AlgorithmSelectorBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label RectSizeLabel;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label ViewedCellsLabel;
+        private System.Windows.Forms.Button DrawUserPathButton;
     }
 }

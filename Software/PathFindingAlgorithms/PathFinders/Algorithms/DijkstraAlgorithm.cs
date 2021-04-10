@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using PathFinders.Algorithms.PathSmoothing;
 using PathFinders.Graphs;
 using PathFinders.Graphs.SimpleTypes;
 
@@ -16,7 +17,19 @@ namespace PathFinders.Algorithms
                 array[i] = value;
             }
         }
-        
+
+        public IList<Vector2Int> GetSmoothedPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
+        {
+            var rawPath = GetPath(map, start, stop, neighbourMode);
+            if (rawPath == null)
+            {
+                return null;
+            }
+            PathSmoother smoother = new PathSmoother();
+            var path = smoother.GetSmoothedPath(map, rawPath);
+            return path;
+        }
+
 
         public IList<Vector2Int> GetPath(ICellMap map, Vector2Int start, Vector2Int stop, NeighbourMode neighbourMode)
         {
@@ -100,6 +113,26 @@ namespace PathFinders.Algorithms
             path.Reverse();
 
             return path;
+        }
+
+        public void AddObstacle(ICellFragment cellCluster)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearObstacles()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RecalculateObstacles(NeighbourMode neighbourMode = NeighbourMode.SidesAndDiagonals)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Initialize(ICellMap mapBase)
+        {
+            throw new NotImplementedException();
         }
     }
 }

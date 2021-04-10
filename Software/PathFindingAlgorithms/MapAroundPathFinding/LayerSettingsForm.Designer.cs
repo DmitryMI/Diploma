@@ -60,7 +60,7 @@
             this.Controls.Add(this.SaveButton);
             this.Controls.Add(this.LayersCheckedList);
             this.Name = "LayerSettingsForm";
-            this.Text = "LayerSettingsForm";
+            this.Text = "Найтрока слоев";
             this.Load += new System.EventHandler(this.LayerSettingsForm_Load);
             this.ResumeLayout(false);
 

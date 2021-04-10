@@ -28,37 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
             this.OpenMapButton = new System.Windows.Forms.Button();
             this.MainStatusStrip = new System.Windows.Forms.StatusStrip();
             this.ErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.LayerSettings = new System.Windows.Forms.Button();
             this.GetCellMapButton = new System.Windows.Forms.Button();
             this.HpaTestingButton = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
+            this.TestUserYButton = new System.Windows.Forms.Button();
+            this.MapAroundControl = new MapAround.UI.WinForms.MapControl();
+            this.label1 = new System.Windows.Forms.Label();
+            this.DistanceBox = new System.Windows.Forms.TextBox();
+            this.SafeDistanceBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.MainStatusStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).BeginInit();
             this.SuspendLayout();
-            // 
-            // MapAroundControl
-            // 
-            this.MapAroundControl.AlignmentWhileZooming = true;
-            this.MapAroundControl.Animation = false;
-            this.MapAroundControl.AnimationTime = 400;
-            this.MapAroundControl.BackColor = System.Drawing.Color.White;
-            this.MapAroundControl.DragMode = MapAround.UI.WinForms.MapControl.DraggingMode.Pan;
-            this.MapAroundControl.DragThreshold = 1;
-            this.MapAroundControl.Editor = null;
-            this.MapAroundControl.IsDragging = false;
-            this.MapAroundControl.Location = new System.Drawing.Point(12, 12);
-            this.MapAroundControl.Map = null;
-            this.MapAroundControl.MouseWheelZooming = true;
-            this.MapAroundControl.Name = "MapAroundControl";
-            this.MapAroundControl.SelectionMargin = 3;
-            this.MapAroundControl.SelectionRectangleColor = System.Drawing.SystemColors.Highlight;
-            this.MapAroundControl.Size = new System.Drawing.Size(999, 552);
-            this.MapAroundControl.TabIndex = 0;
-            this.MapAroundControl.Text = "mapControl1";
-            this.MapAroundControl.ZoomPercent = 60;
             // 
             // OpenMapButton
             // 
@@ -117,23 +101,96 @@
             this.HpaTestingButton.UseVisualStyleBackColor = true;
             this.HpaTestingButton.Click += new System.EventHandler(this.HpaTestingButton_Click);
             // 
+            // TestUserYButton
+            // 
+            this.TestUserYButton.Location = new System.Drawing.Point(1017, 128);
+            this.TestUserYButton.Name = "TestUserYButton";
+            this.TestUserYButton.Size = new System.Drawing.Size(152, 23);
+            this.TestUserYButton.TabIndex = 7;
+            this.TestUserYButton.Text = "Y TEST";
+            this.TestUserYButton.UseVisualStyleBackColor = true;
+            this.TestUserYButton.Click += new System.EventHandler(this.TestUserYButton_Click);
+            // 
+            // MapAroundControl
+            // 
+            this.MapAroundControl.AlignmentWhileZooming = true;
+            this.MapAroundControl.Animation = false;
+            this.MapAroundControl.AnimationTime = 400;
+            this.MapAroundControl.BackColor = System.Drawing.Color.White;
+            this.MapAroundControl.DragMode = MapAround.UI.WinForms.MapControl.DraggingMode.Pan;
+            this.MapAroundControl.DragThreshold = 1;
+            this.MapAroundControl.Editor = null;
+            this.MapAroundControl.IsDragging = false;
+            this.MapAroundControl.Location = new System.Drawing.Point(12, 12);
+            this.MapAroundControl.Map = null;
+            this.MapAroundControl.MouseWheelZooming = true;
+            this.MapAroundControl.Name = "MapAroundControl";
+            this.MapAroundControl.SelectionMargin = 3;
+            this.MapAroundControl.SelectionRectangleColor = System.Drawing.SystemColors.Highlight;
+            this.MapAroundControl.Size = new System.Drawing.Size(999, 552);
+            this.MapAroundControl.TabIndex = 0;
+            this.MapAroundControl.Text = "mapControl1";
+            this.MapAroundControl.ZoomPercent = 60;
+            this.MapAroundControl.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseDown);
+            this.MapAroundControl.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MapAroundControl_MouseUp);
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(1017, 154);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(152, 31);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Длина пути без учета опасных участков:";
+            // 
+            // DistanceBox
+            // 
+            this.DistanceBox.Location = new System.Drawing.Point(1020, 188);
+            this.DistanceBox.Name = "DistanceBox";
+            this.DistanceBox.ReadOnly = true;
+            this.DistanceBox.Size = new System.Drawing.Size(149, 20);
+            this.DistanceBox.TabIndex = 9;
+            // 
+            // SafeDistanceBox
+            // 
+            this.SafeDistanceBox.Location = new System.Drawing.Point(1020, 255);
+            this.SafeDistanceBox.Name = "SafeDistanceBox";
+            this.SafeDistanceBox.ReadOnly = true;
+            this.SafeDistanceBox.Size = new System.Drawing.Size(149, 20);
+            this.SafeDistanceBox.TabIndex = 11;
+            // 
+            // label2
+            // 
+            this.label2.Location = new System.Drawing.Point(1017, 221);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(152, 31);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Длина пути с учетом опасных участков:";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1181, 589);
+            this.Controls.Add(this.SafeDistanceBox);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.DistanceBox);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.TestUserYButton);
             this.Controls.Add(this.HpaTestingButton);
             this.Controls.Add(this.GetCellMapButton);
             this.Controls.Add(this.LayerSettings);
             this.Controls.Add(this.MainStatusStrip);
             this.Controls.Add(this.OpenMapButton);
             this.Controls.Add(this.MapAroundControl);
+            this.KeyPreview = true;
             this.Name = "MainForm";
-            this.Text = "MainForm";
+            this.Text = "Поиск кратчайшего безопасного пути";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).EndInit();
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
             this.MainStatusStrip.ResumeLayout(false);
             this.MainStatusStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.MapAroundControl)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -148,5 +205,10 @@
         private System.Windows.Forms.Button LayerSettings;
         private System.Windows.Forms.Button GetCellMapButton;
         private System.Windows.Forms.Button HpaTestingButton;
+        private System.Windows.Forms.Button TestUserYButton;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox DistanceBox;
+        private System.Windows.Forms.TextBox SafeDistanceBox;
+        private System.Windows.Forms.Label label2;
     }
 }
